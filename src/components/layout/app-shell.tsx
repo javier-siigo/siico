@@ -1,0 +1,29 @@
+"use client";
+
+import type { CSSProperties } from "react";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+
+import { AppSidebar } from "./app-sidebar";
+import { Topbar } from "./topbar";
+
+interface AppShellProps {
+  user: { name: string; email: string };
+  children: React.ReactNode;
+}
+
+export function AppShell({ user, children }: AppShellProps) {
+  const sidebarStyle = { "--sidebar-width": "16.5rem" } as CSSProperties;
+  return (
+    <SidebarProvider style={sidebarStyle}>
+      <AppSidebar user={user} />
+      <SidebarInset>
+        <Topbar user={user} />
+        <div className="flex flex-1 flex-col">
+          <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+            {children}
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
