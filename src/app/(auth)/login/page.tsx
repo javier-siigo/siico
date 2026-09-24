@@ -25,7 +25,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.7rem]">
+                  <h1 className="text-2xl font-semibold tracking-tight">
                     Iniciar sesión
                   </h1>
                   <p className="text-sm text-muted-foreground">

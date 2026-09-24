@@ -16,15 +16,15 @@ Contadores del área contable de Siigo. Operan principalmente desde portátiles 
 
 ## Product Purpose
 
-Centralizar las automatizaciones contables en un único portal web que permita a los contadores ejecutar flujos desde n8n, consultar el historial de ejecuciones y monitorear el estado de los procesos sin tener que entrar al panel de n8n directamente.
+Centralizar en un único portal web las automatizaciones contables ejecutables vía n8n y las vistas de datos contables consultables (anticipos, ingresos), permitiendo a los contadores ejecutar flujos, consultar el historial de ejecuciones y operar sobre los datos desde un único punto, sin entrar al panel técnico de n8n.
 
 ## Positioning
 
-Una capa de gobierno y operación sobre n8n con autenticación corporativa, historial auditable y catálogo curado de automatizaciones contables, en lugar de exponer el panel técnico de n8n a usuarios de negocio.
+Una capa de gobierno y operación que combina automatización (n8n) y vistas de datos curadas (anticipos, ingresos) con autenticación corporativa e historial auditable, en lugar de exponer el panel técnico de n8n a usuarios de negocio ni fragmentar la operación contable entre múltiples herramientas.
 
 ## Operating Context
 
-Uso intensivo en jornada laboral, principalmente en escritorios con pantallas de portátil. Lectura frecuente de tablas y estados. Necesidad de feedback inmediato cuando se dispara una automatización (éxito, error, duración). Idioma: español.
+Uso intensivo en jornada laboral, principalmente en escritorios con pantallas de portátil. Lectura frecuente de tablas y estados, tanto al consultar el catálogo de automatizaciones como al operar sobre vistas de datos (anticipos, ingresos). Necesidad de feedback inmediato cuando se dispara una automatización (éxito, error, duración). Idioma: español.
 
 ## Capabilities and Constraints
 
@@ -32,8 +32,9 @@ Uso intensivo en jornada laboral, principalmente en escritorios con pantallas de
 - Catálogo navegable de automatizaciones registradas.
 - Historial de ejecuciones por automatización y por usuario.
 - Disparo de automatizaciones vía n8n sin exponer secretos al cliente.
+- Vistas de datos contables consultables (anticipos, ingresos) con creación, edición y eliminación; conviven con el catálogo de automatizaciones pero no dependen de flujos n8n.
 - Tema claro y oscuro.
-- Sin dependencias de base de datos o esquemas definidos en esta fase.
+- Tablas de Supabase para automatizaciones y ejecuciones aún no definidas (decisión abierta en esta fase).
 
 ## Brand Commitments
 

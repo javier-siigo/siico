@@ -1,14 +1,28 @@
 import Link from "next/link";
+import { LayoutDashboard } from "lucide-react";
 
 import { FlagIcon } from "@/lib/flags";
 import { AREAS, procesoHref } from "@/lib/navigation";
 import { PageTransition } from "@/components/motion/page-transition";
+import { EmptyState } from "@/components/common/empty-state";
 
 export const metadata = {
   title: "Inicio",
 };
 
 export default function DashboardPage() {
+  if (AREAS.length === 0) {
+    return (
+      <PageTransition>
+        <EmptyState
+          icon={<LayoutDashboard className="size-7" />}
+          title="Aún no hay áreas configuradas"
+          description="Cuando el equipo agregue áreas en el panel de navegación, aparecerán aquí como tarjetas con sus procesos disponibles."
+        />
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       <div className="flex flex-col gap-6">
@@ -24,20 +38,20 @@ export default function DashboardPage() {
               aria-labelledby={`area-${area.slug}-title`}
               className="flex flex-col rounded-lg border border-border bg-card"
             >
-              <header className="flex flex-col gap-1 border-b border-border px-5 py-4">
-                <div className="flex items-center gap-2">
+              <header className="flex min-w-0 flex-col gap-1 border-b border-border px-5 py-3">
+                <div className="flex min-w-0 items-center gap-2">
                   <area.icon
                     className="size-4 shrink-0 text-muted-foreground"
                     aria-hidden
                   />
                   <h2
                     id={`area-${area.slug}-title`}
-                    className="text-sm font-semibold tracking-tight text-foreground"
+                    className="truncate text-sm font-semibold tracking-tight text-foreground"
                   >
                     {area.label}
                   </h2>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="truncate text-xs text-muted-foreground">
                   {area.description}
                 </p>
               </header>

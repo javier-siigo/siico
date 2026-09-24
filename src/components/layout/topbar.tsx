@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { findProceso } from "@/lib/navigation";
+import { findArea, findProceso } from "@/lib/navigation";
 
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
@@ -26,12 +26,15 @@ function resolveContext(pathname: string | null): ContextInfo | null {
   const [first, second] = segments;
 
   if (first === "dashboard") {
-    return { title: "Inicio" };
+    return { eyebrow: "Catálogo", title: "Inicio" };
   }
 
   if (first && second) {
     const proceso = findProceso(first, second);
-    if (proceso) return { title: proceso.label };
+    if (proceso) {
+      const area = findArea(first);
+      return { eyebrow: area?.label, title: proceso.label };
+    }
     return null;
   }
 
@@ -46,7 +49,7 @@ export function Topbar({ user }: TopbarProps) {
     <header className="app-chrome-topbar sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-sidebar-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
       <SidebarTrigger className="-ml-1" />
       {context ? (
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-baseline gap-2">
           {context.eyebrow && (
             <span className="hidden text-xs uppercase tracking-wider text-muted-foreground sm:inline">
               {context.eyebrow}

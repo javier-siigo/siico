@@ -76,7 +76,7 @@ function DataTableColumnHeader<TData extends RowData, TValue>({
   const canSort = column.getCanSort();
   return (
     <div className="flex items-center justify-between gap-1">
-      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </span>
       {canSort && (
