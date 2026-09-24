@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { FileSpreadsheet, Upload, X } from "lucide-react";
+import { FileSpreadsheet, Loader2, Upload, X } from "lucide-react";
 
 import {
   Attachment,
@@ -220,7 +220,11 @@ function SelectedFilePanel({
       className="w-full min-w-0"
     >
       <AttachmentMedia>
-        <FileSpreadsheet className="size-4" aria-hidden />
+        {isBusy ? (
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+        ) : (
+          <FileSpreadsheet className="size-4" aria-hidden />
+        )}
       </AttachmentMedia>
       <AttachmentContent>
         <AttachmentTitle>{titleText}</AttachmentTitle>

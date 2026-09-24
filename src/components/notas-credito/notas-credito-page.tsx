@@ -15,12 +15,34 @@ function createRunId(): string {
   return `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-const ERROR_MESSAGES: Record<string, string> = {
+type ErrorCode =
+  | "unauthorized"
+  | "bad_request"
+  | "missing_file"
+  | "invalid_type"
+  | "file_too_large"
+  | "upload_failed"
+  | "upload_unauthorized"
+  | "storage_unauthorized"
+  | "storage_not_found"
+  | "upstream_config"
+  | "upstream_timeout"
+  | "upstream_network"
+  | "upstream_status"
+  | "upstream_empty"
+  | "internal";
+
+const ERROR_MESSAGES: Record<ErrorCode, string> = {
   unauthorized: "Tu sesión expiró. Vuelve a iniciar sesión.",
   bad_request: "Solicitud inválida al servidor.",
   missing_file: "Falta el archivo a conciliar.",
   invalid_type: "Tipo de archivo no soportado. Usa .xlsx, .xls o .csv.",
   file_too_large: "El archivo supera el límite de 10 MB.",
+  upload_failed: "No se pudo subir el archivo. Intenta de nuevo.",
+  upload_unauthorized:
+    "No tienes permiso para subir el archivo. Vuelve a iniciar sesión.",
+  storage_unauthorized: "No tienes acceso a este archivo.",
+  storage_not_found: "El archivo subido ya no está disponible. Súbelo de nuevo.",
   upstream_config: "Falta configurar la URL del flujo de conciliación.",
   upstream_timeout: "La conciliación tardó demasiado.",
   upstream_network: "No se pudo contactar el servicio de conciliación.",
@@ -28,6 +50,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   upstream_empty: "El servicio devolvió un archivo vacío.",
   internal: "Error inesperado al conciliar.",
 };
+
+function asErrorCode(value: string | undefined): ErrorCode {
+  return value && value in ERROR_MESSAGES ? (value as ErrorCode) : "internal";
+}
 
 export function NotasCreditoPageClient() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -89,41 +115,89 @@ export function NotasCreditoPageClient() {
       const controller = new AbortController();
       abortRef.current?.abort();
       abortRef.current = controller;
+      const { signal } = controller;
+
+      const fail = (message: string) => {
+        const failed: NotasCreditoRun = {
+          ...baseRun,
+          status: "error",
+          error: message,
+          finishedAt: Date.now(),
+        };
+        finalizeRun(failed);
+        toast.error(message);
+      };
 
       try {
-        const fd = new FormData();
-        fd.append("file", file);
-
-        const response = await fetch("/api/notas-credito/conciliar", {
+        const presignRes = await fetch("/api/notas-credito/upload-url", {
           method: "POST",
-          body: fd,
-          signal: controller.signal,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type || "application/octet-stream",
+            size: file.size,
+          }),
+          signal,
         });
 
-        if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as
+        if (!presignRes.ok) {
+          const payload = (await presignRes.json().catch(() => null)) as
             | { error?: string; code?: string }
             | null;
-          const code = payload?.code ?? "internal";
-          const message = payload?.error ?? ERROR_MESSAGES[code] ?? "Error al conciliar";
-          const failed: NotasCreditoRun = {
-            ...baseRun,
-            status: "error",
-            error: message,
-            finishedAt: Date.now(),
-          };
-          finalizeRun(failed);
-          toast.error(message);
+          const code = asErrorCode(payload?.code);
+          const message =
+            payload?.error ?? ERROR_MESSAGES[code] ?? "Error al preparar la subida";
+          fail(message);
+          return;
+        }
+
+        const { url, path } = (await presignRes.json()) as {
+          url: string;
+          path: string;
+        };
+
+        const uploadRes = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+          },
+          body: file,
+          signal,
+        });
+
+        if (!uploadRes.ok) {
+          const code: keyof typeof ERROR_MESSAGES =
+            uploadRes.status === 401 || uploadRes.status === 403
+              ? "upload_unauthorized"
+              : "upload_failed";
+          fail(ERROR_MESSAGES[code]);
           return;
         }
 
         setCurrentRun({ ...baseRun, status: "processing" });
 
-        const blob = await response.blob();
+        const conciliarRes = await fetch("/api/notas-credito/conciliar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ storagePath: path, originalName: file.name }),
+          signal,
+        });
+
+        if (!conciliarRes.ok) {
+          const payload = (await conciliarRes.json().catch(() => null)) as
+            | { error?: string; code?: string }
+            | null;
+          const code = asErrorCode(payload?.code);
+          const message = payload?.error ?? ERROR_MESSAGES[code] ?? "Error al conciliar";
+          fail(message);
+          return;
+        }
+
+        const blob = await conciliarRes.blob();
         const contentType =
-          response.headers.get("content-type")?.split(";")[0]?.trim() ||
+          conciliarRes.headers.get("content-type")?.split(";")[0]?.trim() ||
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        const cd = response.headers.get("content-disposition") ?? "";
+        const cd = conciliarRes.headers.get("content-disposition") ?? "";
         const filename =
           /filename\*=UTF-8''([^;]+)/i.exec(cd)?.[1] ??
           /filename="?([^";]+)"?/i.exec(cd)?.[1] ??
@@ -137,8 +211,8 @@ export function NotasCreditoPageClient() {
           }
         })();
 
-        const url = URL.createObjectURL(blob);
-        blobUrlsRef.current.set(id, url);
+        const blobUrl = URL.createObjectURL(blob);
+        blobUrlsRef.current.set(id, blobUrl);
 
         const done: NotasCreditoRun = {
           ...baseRun,
@@ -156,16 +230,7 @@ export function NotasCreditoPageClient() {
           setCurrentRun(null);
           return;
         }
-        const message =
-          (err as Error).message || "No se pudo contactar el servicio.";
-        const failed: NotasCreditoRun = {
-          ...baseRun,
-          status: "error",
-          error: message,
-          finishedAt: Date.now(),
-        };
-        finalizeRun(failed);
-        toast.error(message);
+        fail((err as Error).message || "No se pudo contactar el servicio.");
       } finally {
         if (abortRef.current === controller) abortRef.current = null;
       }

@@ -19,6 +19,8 @@ export type ConciliarErrorCode =
   | "missing_file"
   | "invalid_type"
   | "file_too_large"
+  | "storage_unauthorized"
+  | "storage_not_found"
   | "upstream_config"
   | "upstream_timeout"
   | "upstream_network"

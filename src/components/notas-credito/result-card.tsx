@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import {
   Download,
   FileSpreadsheet,
+  Loader2,
   RefreshCw,
 } from "lucide-react";
 
@@ -74,6 +75,8 @@ export function ResultCard({ run, onDownload, onRetry }: ResultCardProps) {
     return <>{run.error ?? "Vuelve a intentarlo o cambia el archivo."}</>;
   }, [run]);
 
+  const busy = run?.status === "uploading" || run?.status === "processing";
+
   return (
     <section
       aria-labelledby="result-title"
@@ -98,7 +101,11 @@ export function ResultCard({ run, onDownload, onRetry }: ResultCardProps) {
         className="w-full min-w-0"
       >
         <AttachmentMedia>
-          <FileSpreadsheet className="size-4" aria-hidden />
+          {busy ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <FileSpreadsheet className="size-4" aria-hidden />
+          )}
         </AttachmentMedia>
         <AttachmentContent>
           <AttachmentTitle>{title}</AttachmentTitle>

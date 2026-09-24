@@ -12,6 +12,11 @@ const serverSchema = z.object({
     .optional()
     .or(z.literal(""))
     .default("webhook/conciliacion-netsuite"),
+  SUPABASE_SERVICE_ROLE_KEY: z
+    .string()
+    .min(1, "Falta la service role key de Supabase")
+    .optional()
+    .or(z.literal("")),
 });
 
 const publicSchema = z.object({
@@ -41,6 +46,7 @@ export function serverEnv(): ServerEnv {
     N8N_BASE_URL: process.env.N8N_BASE_URL,
     N8N_WEBHOOK_SECRET: process.env.N8N_WEBHOOK_SECRET,
     N8N_NOTAS_CREDITO_PATH: process.env.N8N_NOTAS_CREDITO_PATH,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   });
   if (!parsed.success) {
     const messages = parsed.error.issues
