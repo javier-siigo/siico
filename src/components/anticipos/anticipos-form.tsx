@@ -343,8 +343,8 @@ export function AnticiposFormSheet({
           <DialogHeader>
             <DialogTitle>Nuevo registro</DialogTitle>
             <DialogDescription>
-              Diligencia la información del anticipo. La fecha de gestión se
-              inicializa con la fecha de hoy.
+              Completa la información del anticipo. La fecha de gestión puede
+              quedar en blanco y asignarse al legalizarlo.
             </DialogDescription>
           </DialogHeader>
           <AnticiposFormFields {...fieldsProps} />
@@ -359,8 +359,8 @@ export function AnticiposFormSheet({
         <DrawerHeader>
           <DrawerTitle>Nuevo registro</DrawerTitle>
           <DrawerDescription>
-            Diligencia la información del anticipo. La fecha de gestión se
-            inicializa con la fecha de hoy.
+            Completa la información del anticipo. La fecha de gestión puede
+            quedar en blanco y asignarse al legalizarlo.
           </DrawerDescription>
         </DrawerHeader>
         <AnticiposFormFields {...fieldsProps} />

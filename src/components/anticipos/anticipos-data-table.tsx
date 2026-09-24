@@ -15,6 +15,7 @@ import {
   Filter,
   FilterX,
   Inbox,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Search,
@@ -134,8 +135,12 @@ function RowActionsDropdown({
             onSelect={handleLegalize}
             disabled={isLegalizing}
           >
-            <BadgeCheck data-icon="inline-start" />
-            Legalizar anticipo
+            {isLegalizing ? (
+              <Loader2 data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <BadgeCheck data-icon="inline-start" />
+            )}
+            {isLegalizing ? "Legalizando…" : "Legalizar anticipo"}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />

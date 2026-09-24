@@ -1,7 +1,13 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { ArrowUpRight, HandCoins, Plus, Wallet } from "lucide-react";
+import {
+  ArrowUpRight,
+  CheckCircle2,
+  HandCoins,
+  Plus,
+  Wallet,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { AnticiposDataTable } from "@/components/anticipos/anticipos-data-table";
@@ -61,7 +67,7 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
           tone="destructive"
         />
         <KpiTile
-          icon={<ArrowUpRight className="size-4" />}
+          icon={<CheckCircle2 className="size-4" />}
           label="Legalizados"
           value={stats.legalizados}
           tone="success"
@@ -75,14 +81,14 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          {rows.length === 0
-            ? "Aún no hay anticipos registrados."
-            : rows.length === 1
-              ? "1 anticipo registrado en el sistema."
-              : `${rows.length} anticipos registrados en el sistema.`}
+      {rows.length > 0 && (
+        <p className="-mt-2 text-sm text-muted-foreground">
+          Edita, legaliza o elimina cualquier registro desde el menú de acciones
+          de cada fila.
         </p>
+      )}
+
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <Button type="button" onClick={() => setOpen(true)}>
           <Plus className="size-4" />
           Nuevo registro

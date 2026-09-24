@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, LogIn } from "lucide-react";
+import { Eye, EyeOff, Loader2, LogIn } from "lucide-react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ function SubmitButton() {
 
 export function LoginForm() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [state, formAction] = useActionState<LoginState | undefined, FormData>(
     async (_prev, formData) => {
       const next = await loginAction(_prev, formData);
@@ -63,8 +64,8 @@ export function LoginForm() {
   const passwordError = errors.password?.message ?? state?.fieldErrors?.password;
 
   return (
-    <form action={formAction} className="space-y-4" noValidate>
-      <div className="space-y-1.5">
+    <form action={formAction} className="space-y-5" noValidate>
+      <div className="space-y-2">
         <Label htmlFor="email">Correo corporativo</Label>
         <Input
           id="email"
@@ -78,16 +79,32 @@ export function LoginForm() {
         {emailError && <p className="text-xs text-destructive">{emailError}</p>}
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label htmlFor="password">Contraseña</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          aria-invalid={Boolean(passwordError)}
-          {...register("password")}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            required
+            aria-invalid={Boolean(passwordError)}
+            className="pr-10"
+            {...register("password")}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            aria-pressed={showPassword}
+            className="absolute inset-y-0 right-0 flex w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        </div>
         {passwordError && (
           <p className="text-xs text-destructive">{passwordError}</p>
         )}
