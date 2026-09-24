@@ -7,6 +7,11 @@ const serverSchema = z.object({
     .optional()
     .or(z.literal("")),
   N8N_WEBHOOK_SECRET: z.string().optional().or(z.literal("")),
+  N8N_NOTAS_CREDITO_PATH: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .default("webhook/conciliacion-netsuite"),
 });
 
 const publicSchema = z.object({
@@ -35,6 +40,7 @@ export function serverEnv(): ServerEnv {
   const parsed = serverSchema.safeParse({
     N8N_BASE_URL: process.env.N8N_BASE_URL,
     N8N_WEBHOOK_SECRET: process.env.N8N_WEBHOOK_SECRET,
+    N8N_NOTAS_CREDITO_PATH: process.env.N8N_NOTAS_CREDITO_PATH,
   });
   if (!parsed.success) {
     const messages = parsed.error.issues
