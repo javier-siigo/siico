@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { PageTransition } from "@/components/motion/page-transition";
 import { EmptyState } from "@/components/common/empty-state";
 import { AREAS, findProceso } from "@/lib/navigation";
 
@@ -25,10 +26,12 @@ export default async function ProcesoPage({ params }: PageProps) {
   if (!procObj) notFound();
 
   return (
-    <EmptyState
-      icon={<procObj.icon className="size-7" />}
-      title="Este proceso aún no tiene contenido"
-      description="Cuando el equipo configure los parámetros y permisos, aparecerán aquí los pasos a ejecutar."
-    />
+    <PageTransition>
+      <EmptyState
+        icon={<procObj.icon className="size-7" />}
+        title="Este proceso aún no tiene contenido"
+        description="Cuando el equipo configure los parámetros y permisos, aparecerán aquí los pasos a ejecutar."
+      />
+    </PageTransition>
   );
 }

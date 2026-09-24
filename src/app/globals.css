@@ -171,3 +171,144 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* ===== View Transitions ===== */
+
+:root {
+  --duration-exit: 150ms;
+  --duration-enter: 210ms;
+  --duration-move: 400ms;
+  --easing-exit: cubic-bezier(0.4, 0, 1, 1);
+  --easing-enter: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Persistent chrome — hand-named to pull them out of the root snapshot. */
+.app-chrome-topbar {
+  view-transition-name: app-topbar;
+}
+.app-chrome-sidebar {
+  view-transition-name: app-sidebar;
+}
+
+::view-transition-group(app-topbar),
+::view-transition-group(app-sidebar) {
+  animation: none;
+  z-index: 60;
+}
+::view-transition-old(app-topbar),
+::view-transition-old(app-sidebar) {
+  display: none;
+}
+::view-transition-new(app-topbar),
+::view-transition-new(app-sidebar) {
+  animation: none;
+}
+
+/* Theme transition: magicui toggler tags <html> during a theme swap.
+   The chrome must crossfade with the rest of the page (not snap). */
+html[data-magicui-theme-vt="active"] ::view-transition-old(app-topbar),
+html[data-magicui-theme-vt="active"] ::view-transition-old(app-sidebar) {
+  display: block;
+  animation: var(--duration-enter) var(--easing-exit) forwards fade-out;
+}
+html[data-magicui-theme-vt="active"] ::view-transition-new(app-topbar),
+html[data-magicui-theme-vt="active"] ::view-transition-new(app-sidebar) {
+  opacity: 0;
+  animation: var(--duration-enter) var(--easing-enter) forwards fade;
+}
+
+/* Overlay shouldn't capture pointer events while the transition runs. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Live root: kill the implicit root cross-fade. Only named VTs animate.
+   Every page is wrapped in <PageTransition>, so content is always named. */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Auth flow: vertical motion communicates entering / leaving the workspace. */
+::view-transition-old(.auth-enter) {
+  animation: var(--duration-exit) var(--easing-exit) forwards fade-out;
+}
+::view-transition-new(.auth-enter) {
+  opacity: 0;
+  translate: 0 14px;
+  animation:
+    var(--duration-enter) var(--easing-enter) forwards fade,
+    var(--duration-move) var(--easing-enter) forwards rise;
+}
+
+::view-transition-old(.auth-exit) {
+  animation:
+    var(--duration-exit) var(--easing-exit) forwards fade-out,
+    280ms var(--easing-exit) forwards fall;
+}
+::view-transition-new(.auth-exit) {
+  opacity: 0;
+  animation: var(--duration-enter) var(--easing-enter) forwards fade;
+}
+
+/* Directional intra-app navigation: fade only. Type names preserved for
+   future directional variants. */
+::view-transition-old(.nav-forward) {
+  animation: var(--duration-exit) var(--easing-exit) forwards fade-out;
+}
+::view-transition-new(.nav-forward) {
+  opacity: 0;
+  animation: var(--duration-enter) var(--easing-enter) forwards fade;
+}
+
+::view-transition-old(.nav-back) {
+  animation: var(--duration-exit) var(--easing-exit) forwards fade-out;
+}
+::view-transition-new(.nav-back) {
+  opacity: 0;
+  animation: var(--duration-enter) var(--easing-enter) forwards fade;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes rise {
+  from {
+    translate: 0 14px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+@keyframes fall {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+}

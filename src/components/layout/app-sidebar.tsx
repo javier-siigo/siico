@@ -93,7 +93,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
   }
 
   return (
-    <Sidebar collapsible="offcanvas">
+    <Sidebar collapsible="offcanvas" className="app-chrome-sidebar">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -103,7 +103,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               tooltip="SIICO · Portal contable"
               className="data-[active=true]:bg-transparent"
             >
-              <Link href="/dashboard">
+              <Link href="/dashboard" transitionTypes={pathname !== "/dashboard" ? ["nav-back"] : undefined}>
                 <span className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                   <LayoutDashboard className="size-4" />
                 </span>
@@ -127,7 +127,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               isActive={pathname === "/dashboard"}
               tooltip="Inicio"
             >
-              <Link href="/dashboard">
+              <Link href="/dashboard" transitionTypes={pathname !== "/dashboard" ? ["nav-back"] : undefined}>
                 <Home />
                 <span>Inicio</span>
               </Link>
@@ -180,7 +180,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                                   isActive={active}
                                   size="sm"
                                 >
-                                  <Link href={href}>
+                                  <Link href={href} transitionTypes={["nav-forward"]}>
                                     {proceso.flagCode ? (
                                       <FlagIcon
                                         code={proceso.flagCode}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PageTransition } from "@/components/motion/page-transition";
 import { KpiGrid, KpiTile } from "@/components/dashboard/kpi-tile";
 import {
   Card,
@@ -20,6 +21,7 @@ export default async function DashboardPage() {
     AREAS.find((a) => a.slug === "conciliaciones")?.procesos.length ?? 0;
 
   return (
+    <PageTransition>
     <div className="flex flex-col gap-8">
       <KpiGrid>
         <KpiTile label="Áreas" value={AREAS.length} context="Disponibles" />
@@ -60,6 +62,7 @@ export default async function DashboardPage() {
                   <li key={proceso.slug} className="min-w-0">
                     <Link
                       href={procesoHref(area.slug, proceso.slug)}
+                      transitionTypes={["nav-forward"]}
                       className="group flex h-full min-w-0 items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2.5 text-sm transition-colors hover:border-primary/40 hover:bg-accent"
                     >
                       <span className="flex min-w-0 items-center gap-2">
@@ -80,5 +83,6 @@ export default async function DashboardPage() {
         ))}
       </div>
     </div>
+    </PageTransition>
   );
 }

@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { AuthApiError, AuthError } from "@supabase/supabase-js";
 import { z } from "zod";
 
@@ -14,6 +13,7 @@ const loginSchema = z.object({
 export type LoginState = {
   error?: string;
   fieldErrors?: Partial<Record<"email" | "password", string>>;
+  success?: boolean;
 };
 
 export async function loginAction(
@@ -45,17 +45,17 @@ export async function loginAction(
     return { error: messageFromAuthError(err) };
   }
 
-  redirect("/dashboard");
+  return { success: true };
 }
 
-export async function logoutAction() {
+export async function logoutAction(): Promise<{ success: true }> {
   try {
     const supabase = await createClient();
     await supabase.auth.signOut();
   } catch {
-    // sesión ya inválida; redirigimos igual
+    // sesión ya inválida; cerramos igual
   }
-  redirect("/login");
+  return { success: true };
 }
 
 function messageFromAuthError(err: unknown): string {

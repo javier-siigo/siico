@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, LogIn } from "lucide-react";
 import { z } from "zod";
@@ -39,8 +40,15 @@ function SubmitButton() {
 }
 
 export function LoginForm() {
+  const router = useRouter();
   const [state, formAction] = useActionState<LoginState | undefined, FormData>(
-    loginAction,
+    async (_prev, formData) => {
+      const next = await loginAction(_prev, formData);
+      if (next.success) {
+        router.push("/dashboard", { transitionTypes: ["auth-enter"] });
+      }
+      return next;
+    },
     undefined,
   );
   const {

@@ -1,4 +1,5 @@
 import { AnticiposPageClient } from "@/components/anticipos/anticipos-page";
+import { PageTransition } from "@/components/motion/page-transition";
 import { getAnticiposAll } from "@/lib/anticipos/actions";
 
 export const metadata = {
@@ -8,5 +9,9 @@ export const metadata = {
 export default async function GestionAnticiposPage() {
   const rows = await getAnticiposAll();
 
-  return <AnticiposPageClient rows={rows} />;
+  return (
+    <PageTransition>
+      <AnticiposPageClient rows={rows} />
+    </PageTransition>
+  );
 }

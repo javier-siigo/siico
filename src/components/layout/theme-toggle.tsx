@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { Monitor, Moon, Sun } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -13,16 +13,11 @@ export function ThemeToggle() {
 
   const isDark = mounted && resolvedTheme === "dark";
 
-  function cycle() {
-    if (!mounted) return;
-    setTheme(isDark ? "light" : "dark");
-  }
-
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={cycle}
+    <AnimatedThemeToggler
+      theme={isDark ? "dark" : "light"}
+      onThemeChange={(next) => setTheme(next)}
+      duration={500}
       aria-label={
         mounted
           ? isDark
@@ -30,16 +25,9 @@ export function ThemeToggle() {
             : "Cambiar a tema oscuro"
           : "Cambiar tema"
       }
-    >
-      {mounted ? (
-        isDark ? (
-          <Sun className="h-4 w-4" />
-        ) : (
-          <Moon className="h-4 w-4" />
-        )
-      ) : (
-        <Monitor className="h-4 w-4" />
+      className={cn(
+        "inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       )}
-    </Button>
+    />
   );
 }
