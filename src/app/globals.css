@@ -304,11 +304,71 @@ html[data-magicui-theme-vt="active"] ::view-transition-new(app-sidebar) {
   }
 }
 
+/* ===== gestion-anticipos motion (operate mode) ===== */
+
+/* New row arrival: brief success wash so the eye finds the added row.
+   Animates background-color on <tr>; data-just-added toggles the rule. */
+@keyframes anticipos-row-flash {
+  0% {
+    background-color: color-mix(in oklch, oklch(0.6 0.16 160) 22%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Legalize action: emerald halo on the falta badge while the row transitions
+   to "legalizado". Targets the badge descendant of the row. */
+@keyframes anticipos-row-halo {
+  0% {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px transparent;
+  }
+  22% {
+    background-color: color-mix(in oklch, oklch(0.6 0.16 160) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, oklch(0.6 0.16 160) 70%, transparent);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px transparent;
+  }
+}
+
+/* KPI tile entrance: subtle rise + fade for the 4 tiles on first mount.
+   Per-tile delay set inline. Operate mode: keep the cascade short. */
+@keyframes anticipos-kpi-rise {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+tr[data-just-added="true"] {
+  animation: anticipos-row-flash 720ms var(--easing-enter);
+}
+
+tr[data-just-legalized="true"] [data-falta-badge] {
+  animation: anticipos-row-halo 640ms var(--easing-enter);
+}
+
+.kpi-tile-stagger {
+  animation: anticipos-kpi-rise 240ms var(--easing-enter) backwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),
   ::view-transition-group(*) {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;
+  }
+  tr[data-just-added="true"],
+  tr[data-just-legalized="true"] [data-falta-badge],
+  .kpi-tile-stagger {
+    animation: none !important;
   }
 }

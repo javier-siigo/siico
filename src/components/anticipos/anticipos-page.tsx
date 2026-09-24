@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -15,6 +15,9 @@ import { AnticiposDeleteDialog } from "@/components/anticipos/anticipos-delete-d
 import { AnticiposEditSheet } from "@/components/anticipos/anticipos-edit-sheet";
 import { AnticiposFormSheet } from "@/components/anticipos/anticipos-form";
 import type { AnticipoRow } from "@/lib/anticipos/schema";
+
+const HIGHLIGHT_ADD_MS = 720;
+const HIGHLIGHT_LEGALIZE_MS = 640;
 
 function isPendienteFalta(value: AnticipoRow["falta"]): boolean {
   return value !== "legalizado";
@@ -32,6 +35,77 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
   const [open, setOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<AnticipoRow | null>(null);
   const [deletingRow, setDeletingRow] = useState<AnticipoRow | null>(null);
+  const [highlightedRowIds, setHighlightedRowIds] = useState<{
+    added: Set<string>;
+    legalized: Set<string>;
+  }>({ added: new Set(), legalized: new Set() });
+
+  const prevRowsRef = useRef<AnticipoRow[]>([]);
+  const highlightTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(
+    new Set(),
+  );
+
+  useEffect(() => {
+    const prevById = new Map(prevRowsRef.current.map((r) => [r.id, r]));
+    const initialMount = prevRowsRef.current.length === 0;
+    const newIds: string[] = [];
+    const newlyLegalizedIds: string[] = [];
+    for (const row of rows) {
+      const prev = prevById.get(row.id);
+      if (!prev) {
+        if (!initialMount) newIds.push(row.id);
+        continue;
+      }
+      if (prev.falta !== "legalizado" && row.falta === "legalizado") {
+        newlyLegalizedIds.push(row.id);
+      }
+    }
+
+    if (newIds.length > 0 || newlyLegalizedIds.length > 0) {
+      setHighlightedRowIds((prev) => {
+        const added = new Set(prev.added);
+        const legalized = new Set(prev.legalized);
+        for (const id of newIds) added.add(id);
+        for (const id of newlyLegalizedIds) legalized.add(id);
+        return { added, legalized };
+      });
+
+      for (const id of newIds) {
+        const timer = setTimeout(() => {
+          highlightTimersRef.current.delete(timer);
+          setHighlightedRowIds((prev) => {
+            if (!prev.added.has(id)) return prev;
+            const added = new Set(prev.added);
+            added.delete(id);
+            return { added, legalized: prev.legalized };
+          });
+        }, HIGHLIGHT_ADD_MS);
+        highlightTimersRef.current.add(timer);
+      }
+
+      for (const id of newlyLegalizedIds) {
+        const timer = setTimeout(() => {
+          highlightTimersRef.current.delete(timer);
+          setHighlightedRowIds((prev) => {
+            if (!prev.legalized.has(id)) return prev;
+            const legalized = new Set(prev.legalized);
+            legalized.delete(id);
+            return { added: prev.added, legalized };
+          });
+        }, HIGHLIGHT_LEGALIZE_MS);
+        highlightTimersRef.current.add(timer);
+      }
+    }
+
+    prevRowsRef.current = rows;
+  }, [rows]);
+
+  useEffect(() => {
+    return () => {
+      for (const timer of highlightTimersRef.current) clearTimeout(timer);
+      highlightTimersRef.current.clear();
+    };
+  }, []);
 
   const stats = useMemo(() => {
     const total = rows.length;
@@ -53,24 +127,28 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
           label="Total registros"
           value={stats.total}
           tone="default"
+          staggerIndex={0}
         />
         <KpiTile
           icon={<Wallet className="size-4" />}
           label="Pendientes"
           value={stats.pendientes}
           tone="warning"
+          staggerIndex={1}
         />
         <KpiTile
           icon={<ArrowUpRight className="size-4" />}
           label="Devoluciones"
           value={stats.devoluciones}
           tone="destructive"
+          staggerIndex={2}
         />
         <KpiTile
           icon={<CheckCircle2 className="size-4" />}
           label="Legalizados"
           value={stats.legalizados}
           tone="success"
+          staggerIndex={3}
           suffix={
             stats.total > 0 ? (
               <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
@@ -81,25 +159,33 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
         />
       </div>
 
-      {rows.length > 0 && (
-        <p className="-mt-2 text-sm text-muted-foreground">
-          Edita, legaliza o elimina cualquier registro desde el menú de acciones
-          de cada fila.
-        </p>
-      )}
+      <div className="flex flex-col gap-3">
+        <div
+          className={
+            rows.length > 0
+              ? "flex flex-col-reverse items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-3"
+              : "flex justify-end"
+          }
+        >
+          {rows.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Edita, legaliza o elimina cualquier registro desde el menú de
+              acciones de cada fila.
+            </p>
+          )}
+          <Button type="button" onClick={() => setOpen(true)}>
+            <Plus className="size-4" />
+            Nuevo registro
+          </Button>
+        </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <Button type="button" onClick={() => setOpen(true)}>
-          <Plus className="size-4" />
-          Nuevo registro
-        </Button>
+        <AnticiposDataTable
+          rows={rows}
+          onEdit={setEditingRow}
+          onDelete={setDeletingRow}
+          highlightedRowIds={highlightedRowIds}
+        />
       </div>
-
-      <AnticiposDataTable
-        rows={rows}
-        onEdit={setEditingRow}
-        onDelete={setDeletingRow}
-      />
 
       <AnticiposFormSheet open={open} onOpenChange={setOpen} />
       <AnticiposEditSheet
@@ -124,6 +210,7 @@ interface KpiTileProps {
   value: number;
   tone?: KpiTone;
   suffix?: React.ReactNode;
+  staggerIndex: number;
 }
 
 const TONE_CLASSES: Record<KpiTone, string> = {
@@ -139,9 +226,19 @@ const TONE_CLASSES: Record<KpiTone, string> = {
     "bg-muted text-muted-foreground border-border",
 };
 
-function KpiTile({ icon, label, value, tone = "default", suffix }: KpiTileProps) {
+function KpiTile({
+  icon,
+  label,
+  value,
+  tone = "default",
+  suffix,
+  staggerIndex,
+}: KpiTileProps) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
+    <div
+      className="kpi-tile-stagger flex items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-sm"
+      style={{ animationDelay: `${staggerIndex * 40}ms` }}
+    >
       <div
         className={`flex size-9 shrink-0 items-center justify-center rounded-md border ${TONE_CLASSES[tone]}`}
         aria-hidden

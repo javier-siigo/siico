@@ -154,6 +154,7 @@ export const columns = columnHelper.columns([
       return (
         <Badge
           variant="outline"
+          data-falta-badge="true"
           className={cn("font-medium", faltaToneClass(value))}
         >
           <span

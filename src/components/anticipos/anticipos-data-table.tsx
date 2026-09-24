@@ -85,6 +85,10 @@ interface AnticiposDataTableProps {
   rows: AnticipoRow[];
   onEdit: (row: AnticipoRow) => void;
   onDelete: (row: AnticipoRow) => void;
+  highlightedRowIds?: {
+    added?: ReadonlySet<string>;
+    legalized?: ReadonlySet<string>;
+  };
 }
 
 const columnHelper = createColumnHelper<DataTableFeatures, AnticipoRow>();
@@ -201,6 +205,7 @@ export function AnticiposDataTable({
   rows,
   onEdit,
   onDelete,
+  highlightedRowIds,
 }: AnticiposDataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -416,7 +421,8 @@ export function AnticiposDataTable({
       {visibleRows.length ? (
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <Table>
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -435,17 +441,29 @@ export function AnticiposDataTable({
                 ))}
               </TableHeader>
               <TableBody>
-                {visibleRows.map((row) => (
-                  <TableRow key={row.id} className="group">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-2.5">
-                        <table.FlexRender cell={cell} />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                {visibleRows.map((row) => {
+                  const id = row.id;
+                  const justAdded = highlightedRowIds?.added?.has(id) ?? false;
+                  const justLegalized =
+                    highlightedRowIds?.legalized?.has(id) ?? false;
+                  return (
+                    <TableRow
+                      key={id}
+                      className="group"
+                      data-just-added={justAdded ? "true" : undefined}
+                      data-just-legalized={justLegalized ? "true" : undefined}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="py-2.5">
+                          <table.FlexRender cell={cell} />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       ) : hasFilters ? (
