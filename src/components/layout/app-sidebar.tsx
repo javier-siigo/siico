@@ -24,9 +24,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { FlagIcon } from "@/lib/flags";
 import { AREAS, procesoHref } from "@/lib/navigation";
 
 const OPEN_AREAS_KEY = "siico:sidebar-areas-open";
@@ -119,30 +119,26 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarSeparator />
-
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/dashboard"}
-                  tooltip="Inicio"
-                >
-                  <Link href="/dashboard">
-                    <Home />
-                    <span>Inicio</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarMenu className="px-2">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/dashboard"}
+              tooltip="Inicio"
+            >
+              <Link href="/dashboard">
+                <Home />
+                <span>Inicio</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Áreas</SidebarGroupLabel>
+          <SidebarGroupLabel className="h-7 px-2 text-[11px] uppercase tracking-wide font-medium text-sidebar-foreground/55">
+            Áreas
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {AREAS.map((area) => {
@@ -185,7 +181,15 @@ export function AppSidebar({ user }: AppSidebarProps) {
                                   size="sm"
                                 >
                                   <Link href={href}>
-                                    <proceso.icon />
+                                    {proceso.flagCode ? (
+                                      <FlagIcon
+                                        code={proceso.flagCode}
+                                        title={proceso.label}
+                                        className="size-4 shrink-0 rounded-[2px]"
+                                      />
+                                    ) : (
+                                      <proceso.icon />
+                                    )}
                                     <span>{proceso.label}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
@@ -203,28 +207,27 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarSeparator />
-
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <div className="flex items-center gap-2 px-2 py-1.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-              <Avatar className="size-7">
-                <AvatarFallback className="text-[11px]">
-                  {getInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex min-w-0 flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate text-xs font-medium text-sidebar-foreground">
-                  {user.name}
-                </span>
-                <span className="truncate text-[11px] text-sidebar-foreground/55">
-                  {user.email || "SIICO · v0.1"}
-                </span>
-              </div>
+        <div className="rounded-md border border-sidebar-border bg-sidebar-accent/40 p-2 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
+          <div
+            className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center"
+            aria-label={`Sesión activa: ${user.name}`}
+          >
+            <Avatar className="size-7">
+              <AvatarFallback className="text-[11px]">
+                {getInitials(user.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
+              <span className="truncate text-xs font-medium text-sidebar-foreground">
+                {user.name}
+              </span>
+              <span className="truncate text-[11px] text-sidebar-foreground/55">
+                {user.email || "SIICO · v0.1"}
+              </span>
             </div>
-          </SidebarMenuItem>
-        </SidebarMenu>
+          </div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

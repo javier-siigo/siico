@@ -1,11 +1,12 @@
 import type { LucideIcon } from "lucide-react";
-import { Receipt, Scale, TrendingUp } from "lucide-react";
+import { HandCoins, Receipt, Scale, TrendingUp } from "lucide-react";
 
 export type Proceso = {
   slug: string;
   label: string;
   description: string;
   icon: LucideIcon;
+  flagCode?: string;
 };
 
 export type Area = {
@@ -28,24 +29,28 @@ export const AREAS: Area[] = [
         label: "Colombia",
         description: "Conciliación contable para operaciones en Colombia.",
         icon: Scale,
+        flagCode: "CO",
       },
       {
         slug: "mexico",
         label: "México",
         description: "Conciliación contable para operaciones en México.",
         icon: Scale,
+        flagCode: "MX",
       },
       {
         slug: "uruguay",
         label: "Uruguay",
         description: "Conciliación contable para operaciones en Uruguay.",
         icon: Scale,
+        flagCode: "UY",
       },
       {
         slug: "chile",
         label: "Chile",
         description: "Conciliación contable para operaciones en Chile.",
         icon: Scale,
+        flagCode: "CL",
       },
     ],
   },
@@ -55,6 +60,13 @@ export const AREAS: Area[] = [
     description: "Procesos asociados al ciclo de ingresos.",
     icon: TrendingUp,
     procesos: [
+      {
+        slug: "gestion-anticipos",
+        label: "Gestión y Legalización de Anticipos",
+        description:
+          "Registro y seguimiento de anticipos por colaborador y requerimiento.",
+        icon: HandCoins,
+      },
       {
         slug: "notas-credito",
         label: "Notas crédito",

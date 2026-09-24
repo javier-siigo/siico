@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { PageHeader } from "@/components/common/page-header";
 import { KpiGrid, KpiTile } from "@/components/dashboard/kpi-tile";
 import {
   Card,
@@ -9,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
 import { AREAS, procesoHref } from "@/lib/navigation";
 
 export const metadata = {
@@ -17,28 +15,12 @@ export const metadata = {
 };
 
 export default async function DashboardPage() {
-  let displayName = "Contador";
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase.auth.getClaims();
-    const email = (data?.claims?.email as string | undefined) ?? "";
-    const meta = data?.claims?.user_metadata as { name?: string } | undefined;
-    displayName = meta?.name || email.split("@")[0] || "Contador";
-  } catch {
-    displayName = "Contador";
-  }
-
   const totalProcesos = AREAS.reduce((acc, a) => acc + a.procesos.length, 0);
   const paisesCubiertos =
     AREAS.find((a) => a.slug === "conciliaciones")?.procesos.length ?? 0;
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader
-        title={`Hola, ${displayName}`}
-        description="Accede a los procesos contables por área. Cada proceso abre su propia vista con los pasos y parámetros configurados."
-      />
-
       <KpiGrid>
         <KpiTile label="Áreas" value={AREAS.length} context="Disponibles" />
         <KpiTile

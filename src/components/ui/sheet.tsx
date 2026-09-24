@@ -76,6 +76,20 @@ const SheetHeader = ({
 );
 SheetHeader.displayName = "SheetHeader";
 
+const SheetFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "mt-auto flex flex-col-reverse gap-2 px-5 py-3 sm:flex-row sm:justify-end sm:gap-2",
+      className,
+    )}
+    {...props}
+  />
+);
+SheetFooter.displayName = "SheetFooter";
+
 const SheetTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -105,6 +119,7 @@ export {
   SheetTrigger,
   SheetClose,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetDescription,
