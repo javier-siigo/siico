@@ -3,14 +3,20 @@
 import * as React from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { Column, RowData } from "@tanstack/table-core";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   ANTICIPOS_FALTA_LABELS,
   ANTICIPOS_OBSERVACION_1_LABELS,
+  daysSinceIsoDate,
   type AnticipoFalta,
   type AnticipoObservacion1,
   type AnticipoRow,
@@ -206,10 +212,23 @@ export const columns = columnHelper.columns([
     ),
     cell: ({ row }) => {
       const v = row.getValue<string | null>("observacion_2");
+      if (!v) {
+        return <span className="text-muted-foreground/60">—</span>;
+      }
       return (
-        <span className="block max-w-[20rem] truncate text-sm text-muted-foreground">
-          {v || <span className="text-muted-foreground/60">—</span>}
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="block max-w-[20rem] truncate text-sm text-muted-foreground">
+              {v}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            className="max-w-sm whitespace-pre-wrap break-words"
+          >
+            {v}
+          </TooltipContent>
+        </Tooltip>
       );
     },
     size: 240,
@@ -218,11 +237,43 @@ export const columns = columnHelper.columns([
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Fecha RQ" />
     ),
-    cell: ({ row }) => (
-      <span className="font-mono text-xs whitespace-nowrap tabular-nums text-muted-foreground">
-        {formatDate(row.getValue("fecha_rq"))}
-      </span>
-    ),
+    cell: function FechaRqCell({ row }) {
+      const value = row.getValue("fecha_rq") as string;
+      const r = row.original;
+      const isResolved =
+        r.falta === "legalizado" ||
+        r.observacion_1 === "legalizado" ||
+        r.fecha_gestion !== null;
+      const [mounted, setMounted] = React.useState(false);
+      React.useEffect(() => setMounted(true), []);
+
+      const daysOverdue = mounted ? daysSinceIsoDate(value) : -1;
+      const isOverdue = !isResolved && daysOverdue >= 10;
+
+      return (
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 font-mono text-xs whitespace-nowrap tabular-nums",
+            isOverdue ? "text-destructive" : "text-muted-foreground",
+          )}
+        >
+          {formatDate(value)}
+          {isOverdue && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertTriangle
+                  className="size-3 shrink-0"
+                  aria-label={`Atrasado hace ${daysOverdue} días`}
+                />
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                Atrasado hace {daysOverdue} días
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </span>
+      );
+    },
     size: 110,
   }),
   columnHelper.accessor("fecha_gestion", {

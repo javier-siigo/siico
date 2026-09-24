@@ -83,14 +83,30 @@ export const anticipoCreateSchema = z.object({
   fecha_rq: z.string().refine(isValidIsoDate, {
     message: "Fecha de RQ inválida",
   }),
-  fecha_gestion: z.string().refine(isValidIsoDate, {
-    message: "Fecha de gestión inválida",
-  }),
+  fecha_gestion: z
+    .string()
+    .refine((v) => v === "" || isValidIsoDate(v), {
+      message: "Fecha de gestión inválida",
+    }),
 });
 
 export type AnticipoCreateInput = z.infer<typeof anticipoCreateSchema>;
 
 export type AnticipoCreateField = keyof AnticipoCreateInput;
+
+export const anticipoIdSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export type AnticipoIdInput = z.infer<typeof anticipoIdSchema>;
+
+export const anticipoUpdateSchema = anticipoCreateSchema.extend({
+  id: z.string().uuid(),
+});
+
+export type AnticipoUpdateInput = z.infer<typeof anticipoUpdateSchema>;
+
+export type AnticipoUpdateField = keyof AnticipoUpdateInput;
 
 export const ANTICIPOS_PAGE_SIZE = 10;
 
@@ -125,7 +141,7 @@ export type AnticipoRow = {
   observacion_1: AnticipoObservacion1;
   observacion_2: string | null;
   fecha_rq: string;
-  fecha_gestion: string;
+  fecha_gestion: string | null;
   created_at: string;
 };
 
@@ -143,4 +159,13 @@ export function todayIsoDate(): string {
   const m = String(now.getMonth() + 1).padStart(2, "0");
   const d = String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+export function daysSinceIsoDate(iso: string, now: Date = new Date()): number {
+  if (!iso) return -1;
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return -1;
+  const target = Date.UTC(y, m - 1, d);
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.floor((today - target) / 86_400_000);
 }

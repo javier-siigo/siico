@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ArrowUpRight, HandCoins, Plus, Wallet } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { AnticiposDataTable } from "@/components/anticipos/anticipos-data-table";
+import { AnticiposDeleteDialog } from "@/components/anticipos/anticipos-delete-dialog";
+import { AnticiposEditSheet } from "@/components/anticipos/anticipos-edit-sheet";
 import { AnticiposFormSheet } from "@/components/anticipos/anticipos-form";
 import type { AnticipoRow } from "@/lib/anticipos/schema";
 
@@ -22,6 +24,8 @@ function isLegalizadoFalta(value: AnticipoRow["falta"]): boolean {
 
 export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
   const [open, setOpen] = useState(false);
+  const [editingRow, setEditingRow] = useState<AnticipoRow | null>(null);
+  const [deletingRow, setDeletingRow] = useState<AnticipoRow | null>(null);
 
   const stats = useMemo(() => {
     const total = rows.length;
@@ -31,6 +35,9 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
     const tasaLegalizacion = total === 0 ? 0 : Math.round((legalizados / total) * 100);
     return { total, pendientes, devoluciones, legalizados, tasaLegalizacion };
   }, [rows]);
+
+  const closeEdit = useCallback(() => setEditingRow(null), []);
+  const closeDelete = useCallback(() => setDeletingRow(null), []);
 
   return (
     <div className="flex flex-col gap-5">
@@ -82,9 +89,23 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
         </Button>
       </div>
 
-      <AnticiposDataTable rows={rows} />
+      <AnticiposDataTable
+        rows={rows}
+        onEdit={setEditingRow}
+        onDelete={setDeletingRow}
+      />
 
       <AnticiposFormSheet open={open} onOpenChange={setOpen} />
+      <AnticiposEditSheet
+        row={editingRow}
+        open={Boolean(editingRow)}
+        onOpenChange={closeEdit}
+      />
+      <AnticiposDeleteDialog
+        row={deletingRow}
+        open={Boolean(deletingRow)}
+        onOpenChange={closeDelete}
+      />
     </div>
   );
 }

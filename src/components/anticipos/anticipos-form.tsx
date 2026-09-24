@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { startTransition, useActionState } from "react";
 import { useForm } from "react-hook-form";
-import type { UseFormReturn } from "react-hook-form";
+import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -44,14 +44,32 @@ import {
 } from "@/lib/anticipos/schema";
 import { createAnticipo, type CreateAnticipoState } from "@/lib/anticipos/actions";
 
-function AnticiposFormFields({
+type SharedFields = {
+  nombre?: { message?: string };
+  requerimiento?: { message?: string };
+  falta?: { message?: string };
+  observacion_1?: { message?: string };
+  observacion_2?: { message?: string };
+  fecha_rq?: { message?: string };
+  fecha_gestion?: { message?: string };
+};
+
+type AnticiposFormErrorShape = FieldValues & SharedFields;
+
+function AnticiposFormFields<T extends AnticipoCreateInput & FieldValues>({
   form,
   onCancel,
   onSubmit,
+  submitLabel = "Guardar registro",
+  submittingLabel = "Guardando…",
+  formId,
 }: {
-  form: UseFormReturn<AnticipoCreateInput>;
+  form: UseFormReturn<T>;
   onCancel: () => void;
-  onSubmit: (values: AnticipoCreateInput) => void;
+  onSubmit: (values: T) => void;
+  submitLabel?: string;
+  submittingLabel?: string;
+  formId: string;
 }) {
   const {
     register,
@@ -60,8 +78,11 @@ function AnticiposFormFields({
     formState: { errors, isSubmitting },
   } = form;
 
+  const errs = errors as unknown as AnticiposFormErrorShape;
+
   return (
     <form
+      id={formId}
       onSubmit={handleSubmit(onSubmit)}
       noValidate
       className="flex min-h-0 flex-1 flex-col"
@@ -72,11 +93,11 @@ function AnticiposFormFields({
           <Input
             id="anticipo-nombre"
             autoComplete="off"
-            aria-invalid={Boolean(errors.nombre)}
-            {...register("nombre")}
+            aria-invalid={Boolean(errs.nombre)}
+            {...register("nombre" as Path<T>)}
           />
-          {errors.nombre && (
-            <p className="text-xs text-destructive">{errors.nombre.message}</p>
+          {errs.nombre?.message && (
+            <p className="text-xs text-destructive">{errs.nombre.message}</p>
           )}
         </div>
 
@@ -85,12 +106,12 @@ function AnticiposFormFields({
           <Input
             id="anticipo-requerimiento"
             autoComplete="off"
-            aria-invalid={Boolean(errors.requerimiento)}
-            {...register("requerimiento")}
+            aria-invalid={Boolean(errs.requerimiento)}
+            {...register("requerimiento" as Path<T>)}
           />
-          {errors.requerimiento && (
+          {errs.requerimiento?.message && (
             <p className="text-xs text-destructive">
-              {errors.requerimiento.message}
+              {errs.requerimiento.message}
             </p>
           )}
         </div>
@@ -99,9 +120,12 @@ function AnticiposFormFields({
           <Label htmlFor="anticipo-falta">Falta</Label>
           <Controller
             control={control}
-            name="falta"
+            name={"falta" as Path<T>}
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select
+                value={(field.value as string) ?? ""}
+                onValueChange={field.onChange}
+              >
                 <SelectTrigger id="anticipo-falta" className="w-full">
                   <SelectValue placeholder="Selecciona una falta" />
                 </SelectTrigger>
@@ -115,8 +139,8 @@ function AnticiposFormFields({
               </Select>
             )}
           />
-          {errors.falta && (
-            <p className="text-xs text-destructive">{errors.falta.message}</p>
+          {errs.falta?.message && (
+            <p className="text-xs text-destructive">{errs.falta.message}</p>
           )}
         </div>
 
@@ -124,13 +148,13 @@ function AnticiposFormFields({
           <Label htmlFor="anticipo-observacion-1">Observación 1</Label>
           <Controller
             control={control}
-            name="observacion_1"
+            name={"observacion_1" as Path<T>}
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger
-                  id="anticipo-observacion-1"
-                  className="w-full"
-                >
+              <Select
+                value={(field.value as string) ?? ""}
+                onValueChange={field.onChange}
+              >
+                <SelectTrigger id="anticipo-observacion-1" className="w-full">
                   <SelectValue placeholder="Selecciona una observación" />
                 </SelectTrigger>
                 <SelectContent>
@@ -143,9 +167,9 @@ function AnticiposFormFields({
               </Select>
             )}
           />
-          {errors.observacion_1 && (
+          {errs.observacion_1?.message && (
             <p className="text-xs text-destructive">
-              {errors.observacion_1.message}
+              {errs.observacion_1.message}
             </p>
           )}
         </div>
@@ -158,12 +182,12 @@ function AnticiposFormFields({
           <Textarea
             id="anticipo-observacion-2"
             rows={3}
-            aria-invalid={Boolean(errors.observacion_2)}
-            {...register("observacion_2")}
+            aria-invalid={Boolean(errs.observacion_2)}
+            {...register("observacion_2" as Path<T>)}
           />
-          {errors.observacion_2 && (
+          {errs.observacion_2?.message && (
             <p className="text-xs text-destructive">
-              {errors.observacion_2.message}
+              {errs.observacion_2.message}
             </p>
           )}
         </div>
@@ -174,26 +198,29 @@ function AnticiposFormFields({
             <Input
               id="anticipo-fecha-rq"
               type="date"
-              aria-invalid={Boolean(errors.fecha_rq)}
-              {...register("fecha_rq")}
+              aria-invalid={Boolean(errs.fecha_rq)}
+              {...register("fecha_rq" as Path<T>)}
             />
-            {errors.fecha_rq && (
+            {errs.fecha_rq?.message && (
               <p className="text-xs text-destructive">
-                {errors.fecha_rq.message}
+                {errs.fecha_rq.message}
               </p>
             )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="anticipo-fecha-gestion">Fecha de gestión</Label>
+            <Label htmlFor="anticipo-fecha-gestion">
+              Fecha de gestión{" "}
+              <span className="text-muted-foreground">(opcional)</span>
+            </Label>
             <Input
               id="anticipo-fecha-gestion"
               type="date"
-              aria-invalid={Boolean(errors.fecha_gestion)}
-              {...register("fecha_gestion")}
+              aria-invalid={Boolean(errs.fecha_gestion)}
+              {...register("fecha_gestion" as Path<T>)}
             />
-            {errors.fecha_gestion && (
+            {errs.fecha_gestion?.message && (
               <p className="text-xs text-destructive">
-                {errors.fecha_gestion.message}
+                {errs.fecha_gestion.message}
               </p>
             )}
           </div>
@@ -213,12 +240,12 @@ function AnticiposFormFields({
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Guardando…
+              {submittingLabel}
             </>
           ) : (
             <>
               <Save className="size-4" />
-              Guardar registro
+              {submitLabel}
             </>
           )}
         </Button>
@@ -234,7 +261,7 @@ const DEFAULT_VALUES: AnticipoCreateInput = {
   observacion_1: "no_se_ha_contactado",
   observacion_2: "",
   fecha_rq: todayIsoDate(),
-  fecha_gestion: todayIsoDate(),
+  fecha_gestion: "",
 };
 
 export function AnticiposFormSheet({
@@ -306,6 +333,7 @@ export function AnticiposFormSheet({
     form,
     onCancel: () => handleOpenChange(false),
     onSubmit: onValidSubmit,
+    formId: "anticipos-create-form",
   };
 
   if (isDesktop) {
@@ -340,3 +368,5 @@ export function AnticiposFormSheet({
     </Drawer>
   );
 }
+
+export { AnticiposFormFields, DEFAULT_VALUES as ANTICIPOS_DEFAULT_VALUES };

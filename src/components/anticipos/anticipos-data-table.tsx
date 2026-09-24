@@ -1,20 +1,27 @@
 "use client";
 
 import * as React from "react";
+import { useTransition } from "react";
 import {
   type ColumnFiltersState,
   type ColumnVisibilityState,
   type SortingState,
+  createColumnHelper,
   useTable,
 } from "@tanstack/react-table";
 import {
+  BadgeCheck,
   Columns3,
   Filter,
   FilterX,
   Inbox,
+  MoreHorizontal,
+  Pencil,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +29,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -69,12 +77,82 @@ import {
 
 import { columns } from "./columns";
 import { features } from "./data-table-features";
+import type { DataTableFeatures } from "./data-table-features";
+import { legalizeAnticipo } from "@/lib/anticipos/actions";
 
 interface AnticiposDataTableProps {
   rows: AnticipoRow[];
+  onEdit: (row: AnticipoRow) => void;
+  onDelete: (row: AnticipoRow) => void;
 }
 
-const PAGE_SIZE = 10;
+const columnHelper = createColumnHelper<DataTableFeatures, AnticipoRow>();
+
+function RowActionsDropdown({
+  row,
+  onEdit,
+  onDelete,
+}: {
+  row: AnticipoRow;
+  onEdit: (row: AnticipoRow) => void;
+  onDelete: (row: AnticipoRow) => void;
+}) {
+  const isLegalized = row.falta === "legalizado";
+  const [isLegalizing, startLegalizeTransition] = useTransition();
+
+  function handleLegalize() {
+    const id = row.id;
+    startLegalizeTransition(async () => {
+      const res = await legalizeAnticipo(id);
+      if (res.error) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success("Anticipo legalizado");
+    });
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Abrir acciones"
+          className="size-8 text-muted-foreground hover:text-foreground"
+        >
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem onSelect={() => onEdit(row)}>
+          <Pencil data-icon="inline-start" />
+          Editar registro
+        </DropdownMenuItem>
+        {!isLegalized && (
+          <DropdownMenuItem
+            onSelect={handleLegalize}
+            disabled={isLegalizing}
+          >
+            <BadgeCheck data-icon="inline-start" />
+            Legalizar anticipo
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={() => onDelete(row)}
+          className="text-destructive focus:text-destructive"
+        >
+          <Trash2 data-icon="inline-start" />
+          Eliminar registro
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+const DEFAULT_PAGE_SIZE = 5;
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100] as const;
 const ALL = "__all__";
 
 function buildPageItems(currentPage: number, totalPages: number): Array<
@@ -114,7 +192,11 @@ function matchesEnum<T extends string>(
   return value === filter;
 }
 
-export function AnticiposDataTable({ rows }: AnticiposDataTableProps) {
+export function AnticiposDataTable({
+  rows,
+  onEdit,
+  onDelete,
+}: AnticiposDataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -125,6 +207,7 @@ export function AnticiposDataTable({ rows }: AnticiposDataTableProps) {
   const [faltaFilter, setFaltaFilter] = React.useState<string>("");
   const [observacion1Filter, setObservacion1Filter] = React.useState<string>("");
   const [pageIndex, setPageIndex] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState<number>(DEFAULT_PAGE_SIZE);
 
   const filteredRows = React.useMemo(() => {
     return rows.filter((row) => {
@@ -143,12 +226,38 @@ export function AnticiposDataTable({ rows }: AnticiposDataTableProps) {
 
   React.useEffect(() => {
     setPageIndex(0);
-  }, [faltaFilter, observacion1Filter, globalFilter]);
+  }, [pageSize, faltaFilter, observacion1Filter, globalFilter]);
+
+  const actionsColumn = React.useMemo(
+    () =>
+      columnHelper.display({
+        id: "actions",
+        header: () => <span className="sr-only">Acciones</span>,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <RowActionsDropdown
+              row={row.original}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          </div>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        size: 56,
+      }),
+    [onEdit, onDelete],
+  );
+
+  const fullColumns = React.useMemo(
+    () => [...columns, actionsColumn],
+    [actionsColumn],
+  );
 
   const table = useTable({
     features,
     data: filteredRows,
-    columns,
+    columns: fullColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -158,14 +267,17 @@ export function AnticiposDataTable({ rows }: AnticiposDataTableProps) {
       columnFilters,
       columnVisibility,
       globalFilter,
-      pagination: { pageIndex, pageSize: PAGE_SIZE },
+      pagination: { pageIndex, pageSize },
     },
     onPaginationChange: (updater) => {
       setPageIndex((prev) => {
         const next =
           typeof updater === "function"
-            ? updater({ pageIndex: prev, pageSize: PAGE_SIZE })
+            ? updater({ pageIndex: prev, pageSize })
             : updater;
+        if (next.pageSize !== pageSize) {
+          setPageSize(next.pageSize);
+        }
         return next.pageIndex;
       });
     },
@@ -385,8 +497,8 @@ export function AnticiposDataTable({ rows }: AnticiposDataTableProps) {
               ? "Sin registros."
               : totalFiltered === 0
                 ? "Ningún registro coincide con los filtros."
-                : `Mostrando ${pageIndex * PAGE_SIZE + 1}–${Math.min(
-                    (pageIndex + 1) * PAGE_SIZE,
+                : `Mostrando ${pageIndex * pageSize + 1}–${Math.min(
+                    (pageIndex + 1) * pageSize,
                     totalFiltered,
                   )} de ${totalFiltered} registros${
                     totalFiltered !== totalRows
@@ -394,68 +506,89 @@ export function AnticiposDataTable({ rows }: AnticiposDataTableProps) {
                       : ""
                   }.`}
           </p>
-          {totalPages > 1 && (
-            <Pagination className="mx-0 w-auto justify-end">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      table.previousPage();
-                    }}
-                    aria-disabled={!table.getCanPreviousPage()}
-                    className={
-                      !table.getCanPreviousPage()
-                        ? "pointer-events-none opacity-50"
-                        : undefined
-                    }
-                  />
-                </PaginationItem>
+          <div className="flex items-center justify-end gap-3">
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v) => setPageSize(Number(v))}
+            >
+              <SelectTrigger
+                aria-label="Filas por página"
+                className="h-8 w-auto gap-1.5 px-2.5 text-xs font-normal shadow-none"
+              >
+                <span className="text-muted-foreground">Filas:</span>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {totalPages > 1 && (
+              <Pagination className="mx-0 w-auto justify-end">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        table.previousPage();
+                      }}
+                      aria-disabled={!table.getCanPreviousPage()}
+                      className={
+                        !table.getCanPreviousPage()
+                          ? "pointer-events-none opacity-50"
+                          : undefined
+                      }
+                    />
+                  </PaginationItem>
 
-                {pageItems.map((item, idx) => {
-                  if (item.kind === "ellipsis") {
+                  {pageItems.map((item, idx) => {
+                    if (item.kind === "ellipsis") {
+                      return (
+                        <PaginationItem key={`${item.key}-${idx}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    const page = item.page;
                     return (
-                      <PaginationItem key={`${item.key}-${idx}`}>
-                        <PaginationEllipsis />
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === pageIndex}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            table.setPageIndex(page);
+                          }}
+                        >
+                          {page + 1}
+                        </PaginationLink>
                       </PaginationItem>
                     );
-                  }
-                  const page = item.page;
-                  return (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href="#"
-                        isActive={page === pageIndex}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          table.setPageIndex(page);
-                        }}
-                      >
-                        {page + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
+                  })}
 
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      table.nextPage();
-                    }}
-                    aria-disabled={!table.getCanNextPage()}
-                    className={
-                      !table.getCanNextPage()
-                        ? "pointer-events-none opacity-50"
-                        : undefined
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        table.nextPage();
+                      }}
+                      aria-disabled={!table.getCanNextPage()}
+                      className={
+                        !table.getCanNextPage()
+                          ? "pointer-events-none opacity-50"
+                          : undefined
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
         </div>
       )}
     </div>
