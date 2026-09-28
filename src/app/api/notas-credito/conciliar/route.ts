@@ -9,6 +9,7 @@ import {
   MAX_FILE_SIZE_BYTES,
   conciliarNotasCredito,
 } from "@/lib/notas-credito/conciliar";
+import { highlightNegativeDifferences } from "@/lib/notas-credito/highlight-differences";
 
 const BUCKET = "notas-credito-uploads";
 
@@ -121,8 +122,25 @@ export async function POST(request: Request) {
   try {
     const result = await conciliarNotasCredito(file);
     const arrayBuffer = await result.blob.arrayBuffer();
+
+    let responseBuffer = arrayBuffer;
+    try {
+      const highlighted = await highlightNegativeDifferences(arrayBuffer);
+      responseBuffer = highlighted.buffer;
+      if (highlighted.summary.highlightedRows > 0) {
+        console.info(
+          `[notas-credito] Filas con diferencia negativa resaltadas: ${highlighted.summary.highlightedRows} (hojas: ${highlighted.summary.sheetsProcessed})`,
+        );
+      }
+    } catch (highlightErr) {
+      console.error(
+        "[notas-credito] No se pudo resaltar filas con diferencia negativa; se devuelve el archivo sin modificar.",
+        highlightErr,
+      );
+    }
+
     void admin.storage.from(BUCKET).remove([storagePath]).catch(() => {});
-    return new Response(arrayBuffer, {
+    return new Response(responseBuffer, {
       status: 200,
       headers: {
         "Content-Type": result.contentType,
