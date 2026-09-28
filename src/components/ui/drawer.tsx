@@ -43,7 +43,7 @@ const DrawerContent = React.forwardRef<
         ref={ref}
         data-slot="drawer-content"
         className={cn(
-          "flex w-full max-w-md flex-col rounded-t-lg border bg-background shadow-lg outline-none max-h-[85vh] data-[open]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[open]:fade-in-0 sm:rounded-lg sm:border",
+          "flex w-full max-w-md flex-col rounded-t-lg border bg-card shadow-lg outline-none max-h-[85vh] data-[open]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[open]:fade-in-0 sm:rounded-lg sm:border",
           className,
         )}
         {...props}
@@ -74,7 +74,7 @@ const DrawerFooter = ({
   <div
     data-slot="drawer-footer"
     className={cn(
-      "mt-auto flex flex-col-reverse gap-2 border-t border-border bg-background px-5 py-3 sm:flex-row sm:justify-end sm:gap-2",
+      "mt-auto flex flex-col-reverse gap-2 border-t border-border bg-card px-5 py-3 sm:flex-row sm:justify-end sm:gap-2",
       className,
     )}
     {...props}

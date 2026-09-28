@@ -38,11 +38,11 @@ Uso intensivo en jornada laboral, principalmente en escritorios con pantallas de
 
 ## Brand Commitments
 
-Producto interno de Siigo; estética sobria, profesional y orientada a densidad de información. Sin uso de gradientes llamativos, glassmorphism decorativo ni tipografías display en UI. Lenguaje de UI en español.
+Producto interno de Siigo. El portal adopta la identidad visual de Siigo como anclaje de marca: la barra lateral y los acentos principales usan el azul corporativo de Siigo, sobre un canvas gris neutro con tarjetas blancas para que el contenido funcional destaque por contraste. Sin uso de gradientes llamativos, glassmorphism decorativo ni tipografías display en UI. Lenguaje de UI en español.
 
 ## Evidence on Hand
 
-No hay assets de marca entregados en esta fase. La marca Siigo no se replica visualmente; el portal usa su propio lenguaje sobrio alineado con el modo "Operate" de impecable.
+Siigo publica su identidad visual en siigo.com; el color de marca primario es `#009DFF` (azul Siigo), replicado en tokens OKLCH para el sidebar, los acentos (`primary`, `ring`, `chart-1`) y los estados focus del portal.
 
 ## Product Principles
 

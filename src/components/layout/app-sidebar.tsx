@@ -104,12 +104,12 @@ export function AppSidebar({ user }: AppSidebarProps) {
               className="data-[active=true]:bg-transparent"
             >
               <Link href="/dashboard" transitionTypes={pathname !== "/dashboard" ? ["nav-back"] : undefined}>
-                <span className="flex aspect-square size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <span className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
                   <LayoutDashboard className="size-4" />
                 </span>
                 <div className="flex min-w-0 flex-col leading-tight">
                   <span className="truncate text-sm font-semibold">SIICO</span>
-                  <span className="truncate text-[11px] text-sidebar-foreground/60">
+                  <span className="truncate text-[11px] text-sidebar-foreground/70">
                     Portal contable
                   </span>
                 </div>
@@ -136,7 +136,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
         </SidebarMenu>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="h-7 px-2 text-[11px] uppercase tracking-wide font-medium text-sidebar-foreground/55">
+          <SidebarGroupLabel className="h-7 px-2 text-[11px] uppercase tracking-wide font-medium text-sidebar-foreground/70">
             Áreas
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -208,7 +208,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="rounded-md border border-sidebar-border bg-sidebar-accent/40 p-2 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
+        <div className="rounded-md border border-white/15 bg-white/10 p-2 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
           <div
             className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center"
             aria-label={`Sesión activa: ${user.name}`}
@@ -222,7 +222,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               <span className="truncate text-xs font-medium text-sidebar-foreground">
                 {user.name}
               </span>
-              <span className="truncate text-[11px] text-sidebar-foreground/55">
+              <span className="truncate text-[11px] text-sidebar-foreground/70">
                 {user.email || "SIICO · v0.1"}
               </span>
             </div>
