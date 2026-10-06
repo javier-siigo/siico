@@ -1,18 +1,14 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
-import { FileSpreadsheet, Loader2, Upload, X } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 
 import {
-  Attachment,
-  AttachmentAction,
-  AttachmentActions,
-  AttachmentContent,
-  AttachmentDescription,
-  AttachmentMedia,
-  AttachmentTitle,
-} from "@/components/ui/attachment";
-import { Button } from "@/components/ui/button";
+  ACCEPTED_EXTENSIONS_WITH_DOTS,
+  FileDropZone,
+  SelectedFileChip,
+  formatBytes,
+  type FileSlotState,
+} from "@/components/common/file-upload";
 
 import type { NotasCreditoRun } from "./types";
 
@@ -103,16 +99,17 @@ export function UploadCard({
       <input
         ref={inputRef}
         type="file"
-        accept=".xlsx,.xls,.csv"
+        accept={ACCEPTED_EXTENSIONS_WITH_DOTS.join(",")}
         className="sr-only"
         onChange={onChange}
         disabled={disabled}
       />
 
       {!file ? (
-        <DropZone
+        <FileDropZone
           dragOver={dragOver}
           disabled={disabled}
+          ariaLabel="Seleccionar archivo de notas crédito"
           onClick={openPicker}
           onKeyDown={onKeyDown}
           onDragOver={onDragOver}
@@ -120,154 +117,20 @@ export function UploadCard({
           onDrop={onDrop}
         />
       ) : (
-        <SelectedFilePanel
+        <SelectedFileChip
           file={file}
-          status={status}
-          onSubmit={onSubmit}
+          state={status}
+          busy={disabled}
           onRemove={onRemove}
+          onSubmit={onSubmit}
           onRetry={onRetry}
+          showSubmit={status === "idle"}
+          showRetry={status === "error"}
         />
       )}
     </section>
   );
 }
 
-function DropZone({
-  dragOver,
-  disabled,
-  onClick,
-  onKeyDown,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-}: {
-  dragOver: boolean;
-  disabled: boolean;
-  onClick: () => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDragLeave: () => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
-}) {
-  return (
-    <div
-      role="button"
-      tabIndex={disabled ? -1 : 0}
-      aria-disabled={disabled}
-      aria-label="Seleccionar archivo de notas crédito"
-      onClick={disabled ? undefined : onClick}
-      onKeyDown={onKeyDown}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-      className={
-        "flex min-h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-8 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
-        (dragOver
-          ? "border-primary bg-primary/5"
-          : "border-border hover:border-foreground/30 hover:bg-muted/40")
-      }
-    >
-      <div
-        aria-hidden
-        className="flex size-9 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
-      >
-        <Upload className="size-4" />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-foreground">
-          Arrastra tu archivo aquí
-        </span>
-        <span className="text-xs text-muted-foreground">
-          o haz clic para seleccionarlo · .xlsx, .xls, .csv (máx. 10 MB)
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function SelectedFilePanel({
-  file,
-  status,
-  onSubmit,
-  onRemove,
-  onRetry,
-}: {
-  file: File;
-  status: NotasCreditoRun["status"];
-  onSubmit: () => void;
-  onRemove: () => void;
-  onRetry: () => void;
-}) {
-  const attachmentState = status;
-  const canSubmit = status === "idle";
-  const canRetry = status === "error";
-  const isBusy = status === "uploading" || status === "processing";
-
-  const titleText = file.name;
-  const sizeLabel = useMemo(() => formatBytes(file.size), [file.size]);
-  const verbLabel = useMemo(() => {
-    if (status === "uploading") return "subiendo…";
-    if (status === "processing") return "procesando…";
-    if (status === "done") return "enviado";
-    if (status === "error") return "falló";
-    return null;
-  }, [status]);
-
-  return (
-    <Attachment
-      state={attachmentState}
-      orientation="horizontal"
-      className="w-full min-w-0"
-    >
-      <AttachmentMedia>
-        {isBusy ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-        ) : (
-          <FileSpreadsheet className="size-4" aria-hidden />
-        )}
-      </AttachmentMedia>
-      <AttachmentContent>
-        <AttachmentTitle>{titleText}</AttachmentTitle>
-        <AttachmentDescription>
-          <span className="font-mono text-sm tabular-nums">{sizeLabel}</span>
-          {verbLabel && (
-            <>
-              {" · "}
-              <span className="font-medium uppercase tracking-wide">
-                {verbLabel}
-              </span>
-            </>
-          )}
-        </AttachmentDescription>
-      </AttachmentContent>
-      <AttachmentActions>
-        <AttachmentAction
-          variant="ghost"
-          size="icon-xs"
-          aria-label="Quitar archivo"
-          title="Quitar archivo"
-          onClick={onRemove}
-          disabled={isBusy}
-        >
-          <X className="size-4" aria-hidden />
-        </AttachmentAction>
-        {canSubmit && (
-          <Button size="sm" variant="default" onClick={onSubmit}>
-            Procesar
-          </Button>
-        )}
-        {canRetry && (
-          <Button size="sm" variant="default" onClick={onRetry}>
-            Reintentar
-          </Button>
-        )}
-      </AttachmentActions>
-    </Attachment>
-  );
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
+export { formatBytes };
+export type { FileSlotState };

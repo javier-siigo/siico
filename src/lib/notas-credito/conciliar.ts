@@ -1,16 +1,10 @@
 import { serverEnv } from "@/lib/env";
+import { ACCEPTED_EXTENSIONS, ACCEPTED_MIME_PREFIXES, MAX_FILE_SIZE_BYTES } from "@/lib/uploads";
+
+export { ACCEPTED_EXTENSIONS, ACCEPTED_MIME_PREFIXES, MAX_FILE_SIZE_BYTES };
 
 const N8N_WEBHOOK_PATH_DEFAULT = "webhook/conciliacion-netsuite";
 const REQUEST_TIMEOUT_MS = 60_000;
-export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-export const ACCEPTED_EXTENSIONS = ["xlsx", "xls", "csv"] as const;
-export const ACCEPTED_MIME_PREFIXES = [
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.ms-excel",
-  "text/csv",
-  "application/csv",
-  "application/octet-stream",
-] as const;
 const FALLBACK_FILENAME = "resultado_netsuite.xlsx";
 const FALLBACK_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

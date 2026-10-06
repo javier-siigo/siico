@@ -1,8 +1,9 @@
-import { CL, CO, MX, UY } from "country-flag-icons/react/3x2";
+import { CL, CO, EC, MX, UY } from "country-flag-icons/react/3x2";
 
 const FLAGS = {
   CL,
   CO,
+  EC,
   MX,
   UY,
 } as const;

@@ -1,0 +1,149 @@
+import { NextResponse } from "next/server";
+
+import { ConciliacionError, cleanupStorage, conciliarColombia } from "@/lib/conciliaciones/conciliar";
+import { getBancoPorSlug } from "@/lib/conciliaciones/bancos";
+import { createClient } from "@/lib/supabase/server";
+
+function jsonError(message: string, code: string, status: number) {
+  return NextResponse.json({ error: message, code }, { status });
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export const runtime = "nodejs";
+export const maxDuration = 90;
+
+export async function POST(request: Request) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getClaims();
+  if (error || !data?.claims?.sub) {
+    return jsonError("Tu sesión expiró. Vuelve a iniciar sesión.", "unauthorized", 401);
+  }
+  const userId = data.claims.sub;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonError("Cuerpo inválido: se esperaba JSON", "bad_request", 400);
+  }
+  if (!isPlainObject(body)) {
+    return jsonError("Cuerpo inválido: se esperaba un objeto", "bad_request", 400);
+  }
+
+  const { pais, banco, bancoNombre, storagePathPrincipal, originalNamePrincipal, storagePathPrevio, originalNamePrevio } =
+    body;
+
+  if (typeof pais !== "string" || pais.length === 0) {
+    return jsonError("Falta el país", "bad_request", 400);
+  }
+  if (typeof banco !== "string" || banco.length === 0) {
+    return jsonError("Falta el banco", "bad_request", 400);
+  }
+  if (typeof bancoNombre !== "string" || bancoNombre.length === 0) {
+    return jsonError("Falta el nombre del banco", "bad_request", 400);
+  }
+  if (typeof storagePathPrincipal !== "string" || storagePathPrincipal.length === 0) {
+    return jsonError("Falta el archivo principal", "missing_file", 400);
+  }
+  if (typeof originalNamePrincipal !== "string" || originalNamePrincipal.length === 0) {
+    return jsonError("Falta el nombre del archivo principal", "bad_request", 400);
+  }
+
+  const principalPath = storagePathPrincipal as string;
+  const previoPath =
+    typeof storagePathPrevio === "string" && storagePathPrevio.length > 0
+      ? storagePathPrevio
+      : null;
+
+  if (!isValidStoragePath(principalPath, userId, "principal")) {
+    return jsonError("No tienes acceso a este archivo.", "storage_unauthorized", 403);
+  }
+
+  if (previoPath && !isValidStoragePath(previoPath, userId, "previo")) {
+    return jsonError("No tienes acceso al archivo previo.", "storage_unauthorized", 403);
+  }
+
+  const bancoRow = await getBancoPorSlug(pais, banco);
+  if (!bancoRow) {
+    return jsonError(
+      "El banco seleccionado no está disponible o no tiene una regla configurada.",
+      "upstream_config",
+      400,
+    );
+  }
+
+  const pathsToCleanup = [principalPath];
+  if (previoPath) {
+    pathsToCleanup.push(previoPath);
+  }
+
+  try {
+    const result = await conciliarColombia({
+      webhookUrl: bancoRow.webhookUrl,
+      pais,
+      banco,
+      bancoNombre: bancoNombre as string,
+      principal: {
+        storagePath: principalPath,
+        originalName: originalNamePrincipal as string,
+      },
+      previo:
+        previoPath
+          ? {
+              storagePath: previoPath,
+              originalName:
+                typeof originalNamePrevio === "string" ? originalNamePrevio : "previo",
+            }
+          : undefined,
+    });
+
+    void cleanupStorage(pathsToCleanup);
+    const arrayBuffer = await result.blob.arrayBuffer();
+    return new Response(arrayBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": result.contentType,
+        "Content-Disposition": `attachment; filename="${result.filename}"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (err) {
+    if (err instanceof ConciliacionError) {
+      void cleanupStorage(pathsToCleanup);
+      const message =
+        err.code === "upstream_status" && err.status >= 500
+          ? "El servicio de conciliación no está disponible. Intenta de nuevo."
+          : err.code === "upstream_timeout"
+            ? "La conciliación tardó demasiado. Intenta con un archivo más pequeño."
+            : err.code === "upstream_empty"
+              ? "El servicio devolvió un archivo vacío."
+              : err.message;
+      return NextResponse.json(
+        { error: message, code: err.code },
+        { status: err.status },
+      );
+    }
+    void cleanupStorage(pathsToCleanup);
+    return NextResponse.json(
+      { error: "Error inesperado al conciliar", code: "internal" },
+      { status: 500 },
+    );
+  }
+}
+
+function safeUserId(raw: string): string {
+  return raw.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function isValidStoragePath(
+  path: string,
+  userId: string,
+  kind: "principal" | "previo",
+): boolean {
+  const safe = safeUserId(userId);
+  const prefix = `${safe}/${kind}/`;
+  return path.startsWith(prefix) && !path.slice(prefix.length).includes("/");
+}

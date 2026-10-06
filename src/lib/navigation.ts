@@ -25,11 +25,25 @@ export const AREAS: Area[] = [
     icon: Scale,
     procesos: [
       {
+        slug: "chile",
+        label: "Chile",
+        description: "Conciliación contable para operaciones en Chile.",
+        icon: Scale,
+        flagCode: "CL",
+      },
+      {
         slug: "colombia",
         label: "Colombia",
         description: "Conciliación contable para operaciones en Colombia.",
         icon: Scale,
         flagCode: "CO",
+      },
+      {
+        slug: "ecuador",
+        label: "Ecuador",
+        description: "Conciliación contable para operaciones en Ecuador.",
+        icon: Scale,
+        flagCode: "EC",
       },
       {
         slug: "mexico",
@@ -44,13 +58,6 @@ export const AREAS: Area[] = [
         description: "Conciliación contable para operaciones en Uruguay.",
         icon: Scale,
         flagCode: "UY",
-      },
-      {
-        slug: "chile",
-        label: "Chile",
-        description: "Conciliación contable para operaciones en Chile.",
-        icon: Scale,
-        flagCode: "CL",
       },
     ],
   },
