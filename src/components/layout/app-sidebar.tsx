@@ -26,6 +26,8 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import type { UserRolesInfo } from "@/lib/auth/roles-shared";
+import { filterAreas } from "@/lib/auth/roles-shared";
 import { FlagIcon } from "@/lib/flags";
 import { AREAS, procesoHref } from "@/lib/navigation";
 
@@ -60,9 +62,11 @@ function getInitials(name: string): string {
 
 interface AppSidebarProps {
   user: { name: string; email: string };
+  roles: UserRolesInfo;
 }
 
-export function AppSidebar({ user }: AppSidebarProps) {
+export function AppSidebar({ user, roles }: AppSidebarProps) {
+  const visibleAreas = filterAreas(roles, AREAS);
   const pathname = usePathname();
   const [openAreas, setOpenAreas] = useState<Record<string, boolean>>({});
   const [hydrated, setHydrated] = useState(false);
@@ -141,7 +145,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {AREAS.map((area) => {
+              {visibleAreas.map((area) => {
                 const isOpen = hydrated
                   ? openAreas[area.slug] ?? false
                   : false;

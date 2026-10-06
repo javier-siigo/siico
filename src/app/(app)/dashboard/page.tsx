@@ -1,23 +1,33 @@
+import { redirect } from "next/navigation";
+
 import Link from "next/link";
 import { LayoutDashboard } from "lucide-react";
 
 import { FlagIcon } from "@/lib/flags";
+import { filterAreas, getUserRoles } from "@/lib/auth/roles";
 import { AREAS, procesoHref } from "@/lib/navigation";
 import { PageTransition } from "@/components/motion/page-transition";
 import { EmptyState } from "@/components/common/empty-state";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Inicio",
 };
 
-export default function DashboardPage() {
-  if (AREAS.length === 0) {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims?.sub) redirect("/login");
+  const roles = await getUserRoles(data.claims.sub);
+  const areas = filterAreas(roles, AREAS);
+
+  if (areas.length === 0) {
     return (
       <PageTransition>
         <EmptyState
           icon={<LayoutDashboard className="size-7" />}
-          title="Aún no hay áreas configuradas"
-          description="Cuando el equipo agregue áreas en el panel de navegación, aparecerán aquí como tarjetas con sus procesos disponibles."
+          title="Aún no tienes procesos asignados"
+          description="Cuando un administrador te asigne un rol, aparecerán aquí los procesos a los que tienes acceso."
         />
       </PageTransition>
     );
@@ -32,7 +42,7 @@ export default function DashboardPage() {
         </p>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {AREAS.map((area) => (
+          {areas.map((area) => (
             <section
               key={area.slug}
               aria-labelledby={`area-${area.slug}-title`}

@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { HandCoins, Receipt, Scale, TrendingUp } from "lucide-react";
+import { HandCoins, Receipt, Scale, Settings, TrendingUp } from "lucide-react";
 
 export type Proceso = {
   slug: string;
@@ -79,6 +79,20 @@ export const AREAS: Area[] = [
         label: "Notas crédito",
         description: "Registro y gestión de notas crédito.",
         icon: Receipt,
+      },
+    ],
+  },
+  {
+    slug: "admin",
+    label: "Administración",
+    description: "Configuración interna del portal.",
+    icon: Settings,
+    procesos: [
+      {
+        slug: "usuarios",
+        label: "Usuarios y roles",
+        description: "Asigna roles y permisos a los miembros del equipo.",
+        icon: Settings,
       },
     ],
   },

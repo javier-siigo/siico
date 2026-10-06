@@ -3,13 +3,14 @@
 import { createBrowserClient } from "@supabase/ssr";
 
 import { publicEnv } from "@/lib/env";
+import type { Database } from "@/types/supabase";
 
-let cached: ReturnType<typeof createBrowserClient> | null = null;
+let cached: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
-export function getBrowserClient() {
+export function createClient() {
   if (cached) return cached;
   const env = publicEnv();
-  cached = createBrowserClient(
+  cached = createBrowserClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );

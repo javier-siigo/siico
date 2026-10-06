@@ -59,12 +59,75 @@ export type Database = {
         }
         Relationships: []
       }
+      conciliacion_bancos: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string | null
+          es_particular: boolean
+          id: string
+          nombre: string
+          orden: number
+          pais: string
+          slug: string
+          updated_at: string
+          webhook_url: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          es_particular?: boolean
+          id?: string
+          nombre: string
+          orden?: number
+          pais: string
+          slug: string
+          updated_at?: string
+          webhook_url: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          es_particular?: boolean
+          id?: string
+          nombre?: string
+          orden?: number
+          pais?: string
+          slug?: string
+          updated_at?: string
+          webhook_url?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          paises: string[]
+          roles: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          paises?: string[]
+          roles?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          paises?: string[]
+          roles?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_user_has_role: { Args: { check_role: string }; Returns: boolean }
     }
     Enums: {
       anticipos_falta_enum:
@@ -189,6 +252,21 @@ export type Enums<
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : never
 
 export const Constants = {
   public: {

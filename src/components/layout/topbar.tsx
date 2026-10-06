@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import type { UserRolesInfo } from "@/lib/auth/roles-shared";
 import { findArea, findProceso } from "@/lib/navigation";
 
 import { ThemeToggle } from "./theme-toggle";
@@ -10,6 +11,7 @@ import { UserMenu } from "./user-menu";
 
 interface TopbarProps {
   user: { name: string; email: string };
+  roles: UserRolesInfo;
 }
 
 interface ContextInfo {
@@ -41,7 +43,7 @@ function resolveContext(pathname: string | null): ContextInfo | null {
   return null;
 }
 
-export function Topbar({ user }: TopbarProps) {
+export function Topbar({ user, roles: _roles }: TopbarProps) {
   const pathname = usePathname();
   const context = resolveContext(pathname);
 
