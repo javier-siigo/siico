@@ -46,14 +46,14 @@ export function DualUploadCard({
           </h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Sube el reporte SIIGO del período y, si cuentas con él, el reporte
-          previo. El reporte previo es opcional.
+          Sube el extracto bancario del período y, si cuentas con él, el
+          reporte previo. El reporte previo es opcional.
         </p>
       </header>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <SlotShell
-          title="Reporte SIIGO"
+          title="Extracto bancario"
           required
           subtitle="Obligatorio"
           icon={<Banknote className="size-4" aria-hidden />}
@@ -61,7 +61,7 @@ export function DualUploadCard({
           <FileSlot
             file={principalFile}
             status={principalStatus}
-            ariaLabel="Seleccionar reporte SIIGO"
+            ariaLabel="Seleccionar extracto bancario"
             hint="o haz clic para seleccionarlo · .xlsx, .xls, .csv (máx. 10 MB)"
             onSelect={onSelectPrincipal}
             onRemove={onRemovePrincipal}

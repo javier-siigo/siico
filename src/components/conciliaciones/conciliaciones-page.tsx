@@ -339,8 +339,8 @@ export function ConciliacionesPageClient({
         </h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
           Conciliación contable para operaciones en {PAIS_LABEL[pais]}. Selecciona el
-          banco, carga el reporte SIIGO del período y, si cuentas con uno, el
-          reporte previo.
+          banco, carga el extracto bancario del período y, si cuentas con uno,
+          el reporte previo.
         </p>
       </header>
 
