@@ -139,6 +139,7 @@ export type Database = {
         | "devolucion"
         | "autorizacion_soportes"
         | "revisar_con_harold"
+        | "soportes"
       anticipos_observacion_1_enum:
         | "no_se_ha_contactado"
         | "escrito_1_vez"
@@ -280,6 +281,7 @@ export const Constants = {
         "devolucion",
         "autorizacion_soportes",
         "revisar_con_harold",
+        "soportes",
       ],
       anticipos_observacion_1_enum: [
         "no_se_ha_contactado",

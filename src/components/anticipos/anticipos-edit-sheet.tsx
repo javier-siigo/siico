@@ -118,8 +118,8 @@ export function AnticiposEditSheet({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0">
+          <DialogHeader className="shrink-0 gap-1 border-b border-border px-5 pb-4 pt-5">
             <DialogTitle>Editar registro</DialogTitle>
             <DialogDescription>
               Modifica los campos del anticipo de {row.nombre}. Los cambios se
@@ -134,8 +134,8 @@ export function AnticiposEditSheet({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
+      <DrawerContent className="overflow-hidden">
+        <DrawerHeader className="shrink-0 border-b border-border">
           <DrawerTitle>Editar registro</DrawerTitle>
           <DrawerDescription>
             Modifica los campos del anticipo de {row.nombre}. Los cambios se

@@ -11,6 +11,7 @@ export const ANTICIPOS_FALTA_LABELS = {
   devolucion: "Devolución",
   autorizacion_soportes: "Autorización soportes",
   revisar_con_harold: "Revisar con Harold",
+  soportes: "Soportes",
 } as const satisfies Record<
   Database["public"]["Enums"]["anticipos_falta_enum"],
   string
