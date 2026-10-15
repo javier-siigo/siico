@@ -1,5 +1,12 @@
 import type { LucideIcon } from "lucide-react";
-import { HandCoins, Receipt, Scale, Settings, TrendingUp } from "lucide-react";
+import {
+  Calculator,
+  HandCoins,
+  Receipt,
+  Scale,
+  Settings,
+  TrendingUp,
+} from "lucide-react";
 
 export type Proceso = {
   slug: string;
@@ -79,6 +86,13 @@ export const AREAS: Area[] = [
         label: "Notas crédito",
         description: "Registro y gestión de notas crédito.",
         icon: Receipt,
+      },
+      {
+        slug: "calculo-comisiones",
+        label: "Cálculo de Comisiones",
+        description:
+          "Procesamiento y control mensual del reconocimiento de comisiones.",
+        icon: Calculator,
       },
     ],
   },

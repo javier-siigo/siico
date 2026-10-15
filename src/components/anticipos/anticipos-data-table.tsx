@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTransition } from "react";
 import {
   type ColumnFiltersState,
+  type ColumnSizingState,
   type ColumnVisibilityState,
   type SortingState,
   createColumnHelper,
@@ -163,6 +164,34 @@ function RowActionsDropdown({
 const DEFAULT_PAGE_SIZE = 5;
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100] as const;
 const ALL = "__all__";
+const COLUMN_SIZING_STORAGE_KEY = "siico:anticipos:columnSizing:v1";
+
+function loadColumnSizing(): ColumnSizingState {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(COLUMN_SIZING_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as ColumnSizingState;
+    }
+  } catch {
+    // ignore
+  }
+  return {};
+}
+
+function saveColumnSizing(state: ColumnSizingState) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      COLUMN_SIZING_STORAGE_KEY,
+      JSON.stringify(state),
+    );
+  } catch {
+    // quota or disabled storage; ignore
+  }
+}
 
 function buildPageItems(currentPage: number, totalPages: number): Array<
   | { kind: "page"; page: number }
@@ -213,11 +242,33 @@ export function AnticiposDataTable({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>({});
+  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>({});
+
+  React.useEffect(() => {
+    const stored = loadColumnSizing();
+    if (Object.keys(stored).length > 0) {
+      setColumnSizing(stored);
+    }
+  }, []);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [faltaFilter, setFaltaFilter] = React.useState<string>("");
   const [observacion1Filter, setObservacion1Filter] = React.useState<string>("");
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState<number>(DEFAULT_PAGE_SIZE);
+
+  const handleColumnSizingChange = React.useCallback(
+    (updater: React.SetStateAction<ColumnSizingState>) => {
+      setColumnSizing((prev) => {
+        const next =
+          typeof updater === "function"
+            ? (updater as (old: ColumnSizingState) => ColumnSizingState)(prev)
+            : updater;
+        saveColumnSizing(next);
+        return next;
+      });
+    },
+    [],
+  );
 
   const filteredRows = React.useMemo(() => {
     return rows.filter((row) => {
@@ -254,7 +305,9 @@ export function AnticiposDataTable({
         ),
         enableSorting: false,
         enableHiding: false,
+        enableResizing: false,
         size: 56,
+        minSize: 56,
       }),
     [onEdit, onDelete],
   );
@@ -268,14 +321,18 @@ export function AnticiposDataTable({
     features,
     data: filteredRows,
     columns: fullColumns,
+    columnResizeMode: "onChange",
+    defaultColumn: { minSize: 96 },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnSizingChange: handleColumnSizingChange,
     onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
+      columnSizing,
       globalFilter,
       pagination: { pageIndex, pageSize },
     },
@@ -423,20 +480,52 @@ export function AnticiposDataTable({
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
-              <TableHeader>
+              <TableHeader className="bg-muted/40">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        style={{ width: header.getSize() || undefined }}
-                        className="h-11 align-bottom"
-                      >
-                        {header.isPlaceholder ? null : (
-                          <table.FlexRender header={header} />
-                        )}
-                      </TableHead>
-                    ))}
+                  <TableRow
+                    key={headerGroup.id}
+                    className="border-b hover:bg-transparent data-[state=selected]:bg-transparent"
+                  >
+                    {headerGroup.headers.map((header) => {
+                      const isActions = header.column.id === "actions";
+                      const canResize = header.column.getCanResize();
+                      const isResizing = header.column.getIsResizing();
+                      return (
+                        <TableHead
+                          key={header.id}
+                          style={{ width: header.getSize() || undefined }}
+                          className={cn(
+                            "relative h-9 align-bottom",
+                            isActions &&
+                              "sticky right-0 z-20 border-l border-border bg-card",
+                          )}
+                        >
+                          {header.isPlaceholder ? null : (
+                            <table.FlexRender header={header} />
+                          )}
+                          {canResize && (
+                            <div
+                              role="separator"
+                              aria-orientation="vertical"
+                              aria-label={`Redimensionar columna ${header.column.id}`}
+                              onMouseDown={header.getResizeHandler()}
+                              onTouchStart={header.getResizeHandler()}
+                              className="group/resize absolute top-0 right-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize touch-none select-none items-center justify-center"
+                            >
+                              <span
+                                aria-hidden
+                                className={cn(
+                                  "block h-full w-px transition-colors",
+                                  isResizing
+                                    ? "bg-primary"
+                                    : "bg-transparent group-hover/resize:bg-primary/50",
+                                )}
+                              />
+                            </div>
+                          )}
+                        </TableHead>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </TableHeader>
@@ -453,11 +542,24 @@ export function AnticiposDataTable({
                       data-just-added={justAdded ? "true" : undefined}
                       data-just-legalized={justLegalized ? "true" : undefined}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="py-2.5">
-                          <table.FlexRender cell={cell} />
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell) => {
+                        const isActions = cell.column.id === "actions";
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={cn(
+                              "py-2.5",
+                              isActions &&
+                                "sticky right-0 z-10 border-l border-border bg-card",
+                            )}
+                            style={{
+                              width: cell.column.getSize() || undefined,
+                            }}
+                          >
+                            <table.FlexRender cell={cell} />
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   );
                 })}

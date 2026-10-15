@@ -119,7 +119,9 @@ export const columns = columnHelper.columns([
     ),
     enableSorting: false,
     enableHiding: false,
+    enableResizing: false,
     size: 48,
+    minSize: 40,
   }),
   columnHelper.accessor("nombre", {
     header: ({ column }) => (
@@ -133,6 +135,7 @@ export const columns = columnHelper.columns([
       </div>
     ),
     size: 200,
+    minSize: 140,
   }),
   columnHelper.accessor("requerimiento", {
     header: ({ column }) => (
@@ -144,6 +147,7 @@ export const columns = columnHelper.columns([
       </span>
     ),
     size: 180,
+    minSize: 140,
   }),
   columnHelper.accessor("falta", {
     header: ({ column }) => (
@@ -177,6 +181,7 @@ export const columns = columnHelper.columns([
     },
     enableColumnFilter: false,
     size: 200,
+    minSize: 140,
   }),
   columnHelper.accessor("observacion_1", {
     header: ({ column }) => (
@@ -206,6 +211,7 @@ export const columns = columnHelper.columns([
     },
     enableColumnFilter: false,
     size: 200,
+    minSize: 140,
   }),
   columnHelper.accessor("observacion_2", {
     header: ({ column }) => (
@@ -233,6 +239,7 @@ export const columns = columnHelper.columns([
       );
     },
     size: 240,
+    minSize: 160,
   }),
   columnHelper.accessor("fecha_rq", {
     header: ({ column }) => (
@@ -276,6 +283,7 @@ export const columns = columnHelper.columns([
       );
     },
     size: 110,
+    minSize: 96,
   }),
   columnHelper.accessor("fecha_gestion", {
     header: ({ column }) => (
@@ -287,5 +295,6 @@ export const columns = columnHelper.columns([
       </span>
     ),
     size: 130,
+    minSize: 110,
   }),
 ]);

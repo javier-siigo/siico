@@ -1,5 +1,6 @@
 import {
   columnFilteringFeature,
+  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   createFilteredRowModel,
@@ -16,6 +17,7 @@ import {
 
 export const features = tableFeatures({
   columnFilteringFeature,
+  columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   globalFilteringFeature,
