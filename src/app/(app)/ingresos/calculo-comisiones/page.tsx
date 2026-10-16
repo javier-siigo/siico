@@ -1,36 +1,41 @@
 import { CalculoComisionesPageClient } from "@/components/calculo-comisiones/calculo-comisiones-page";
-import {
-  CONCEPTOS_DEMO,
-  CONTROLES_DEMO,
-  EJECUCIONES_HISTORICO,
-  PERIODOS,
-  RESUMENES_POR_PERIODO,
-  TIPOS_FACTURACION_DEMO,
-} from "@/components/calculo-comisiones/mock-data";
 import { PageTransition } from "@/components/motion/page-transition";
+import { getComisionesData, type ComisionesData } from "@/lib/comisiones/actions";
+import { periodoActual, shiftPeriodo } from "@/lib/comisiones/calculo";
 
 export const metadata = {
   title: "Cálculo de Comisiones",
 };
 
-export default function CalculoComisionesPage() {
-  const periodoInicial = PERIODOS[0]?.id ?? "2026-10";
-  const resumenInicial =
-    RESUMENES_POR_PERIODO[periodoInicial] ??
-    Object.values(RESUMENES_POR_PERIODO)[0];
-  if (!resumenInicial) {
-    throw new Error("No hay resumenes disponibles");
+export default async function CalculoComisionesPage() {
+  // Si Supabase falla (p. ej. migración sin aplicar) la página sigue
+  // disponible para leer el informe; solo se pierde el cálculo y el guardado.
+  let data: ComisionesData = {
+    conceptos: [],
+    valores: [],
+    bases: [],
+    reconocimientos: [],
+    registrados: [],
+    cierres: [],
+  };
+  let errorDatos: string | null = null;
+  try {
+    data = await getComisionesData();
+  } catch (err) {
+    errorDatos = err instanceof Error ? err.message : "Error inesperado.";
   }
+
+  // El informe de un mes llega a inicios del siguiente: por defecto se abre
+  // el mes anterior al actual.
+  const periodoMax = periodoActual();
 
   return (
     <PageTransition>
       <CalculoComisionesPageClient
-        periodos={PERIODOS}
-        resumenInicial={resumenInicial}
-        ejecucionesIniciales={EJECUCIONES_HISTORICO}
-        tiposIniciales={TIPOS_FACTURACION_DEMO}
-        conceptosIniciales={CONCEPTOS_DEMO}
-        controlesIniciales={CONTROLES_DEMO}
+        data={data}
+        periodoInicial={shiftPeriodo(periodoMax, -1)}
+        periodoMax={periodoMax}
+        errorDatos={errorDatos}
       />
     </PageTransition>
   );
