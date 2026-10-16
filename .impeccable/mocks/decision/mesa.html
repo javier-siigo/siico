@@ -1,0 +1,37 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;color:#1F2733;background:#EEF3F9;display:flex}
+.mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.side{width:256px;background:#0088DA;color:#fff;padding:14px 10px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;gap:10px;align-items:center;padding:6px 8px 16px}.brand i{width:32px;height:32px;background:#fff;border-radius:8px}
+.brand b{display:block;font-size:14px}.brand small{font-size:11px;opacity:.7}
+.grp{font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;padding:12px 8px 4px}
+.it{padding:7px 8px;border-radius:6px}.it.on{background:#0064B8;font-weight:600}
+.sub{padding:5px 8px 5px 22px;font-size:12px;border-left:1px solid rgba(255,255,255,.15);margin-left:14px}.sub.on{background:#0064B8;border-radius:6px;font-weight:600}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;background:#fff;border-bottom:1px solid #D9E0E8;display:flex;align-items:center;padding:0 24px;gap:10px;font-size:13px;color:#5B6675}.top b{color:#1F2733}
+.well{padding:24px 32px;display:flex;flex-direction:column;gap:16px;overflow:hidden;flex:1}
+.card{background:#fff;border:1px solid #D9E0E8;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5B6675}
+.muted{color:#5B6675}.h1{font-size:16px;font-weight:600}
+.btn{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #D9E0E8;background:#fff}
+.btn.p{background:#0088DA;color:#fff;border-color:#0088DA}
+.sel{height:36px;border:1px solid #D9E0E8;border-radius:6px;padding:0 12px;display:inline-flex;align-items:center;gap:24px;background:#EEF3F9;color:#5B6675;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5B6675;font-weight:600;text-align:right;padding:8px 12px;background:#F4F7FA;border-bottom:1px solid #D9E0E8}
+th:first-child,td:first-child{text-align:left}
+td{padding:8px 12px;border-bottom:1px solid #E7ECF1;text-align:right}
+td.n{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.ok{color:#0B7A55}.warn{color:#9A6700}
+.grid{display:grid;grid-template-columns:360px 1fr;gap:16px;flex:1;min-height:0}.sec{padding:14px 16px;border-bottom:1px solid #E7ECF1}.sec:last-child{border:0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.k{padding:14px 16px}.k .v{font-size:18px;font-weight:600;margin-top:6px}
+.seg2{display:inline-flex;background:#E7ECF1;border-radius:6px;padding:3px}.seg2 span{padding:5px 12px;border-radius:4px;font-size:13px}.seg2 .on{background:#fff;font-weight:600}</style></head><body><aside class="side"><div class="brand"><i></i><div><b>SIICO</b><small>Portal contable</small></div></div>
+<div class="grp">Áreas</div><div class="it">Dashboard</div><div class="it">Conciliaciones</div><div class="it on">Ingresos</div>
+<div class="sub">Anticipos</div><div class="sub">Notas crédito</div><div class="sub on">Cálculo de comisiones</div></aside>
+<div class="main"><div class="top">Ingresos <span>/</span> <b>Cálculo de comisiones</b></div><div class="well"><div style="display:flex;justify-content:space-between;align-items:end"><div><div class="h1">Cálculo de comisiones</div><div class="muted" style="margin-top:4px">Cierre mensual: las comisiones se llevan al gasto al ritmo del ingreso de las facturas F93/F94.</div></div><div class="sel" style="background:#fff;color:#1F2733">Septiembre 2026 ▾</div></div><div class="grid"><div class="card" style="align-self:start"><div class="sec"><div style="display:flex;justify-content:space-between"><b>1 · Comisiones causadas</b><span class="ok">✓</span></div><div class="mono" style="margin-top:6px">$ 2.241.286.971,20</div><div class="muted">4 conceptos con cuenta</div></div>
+<div class="sec" style="background:#F7FAFC"><div style="display:flex;justify-content:space-between"><b>2 · Facturación del mes</b><span class="warn">Falta</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><div class="sel">F94 fact.</div><div class="sel">F94 NC</div><div class="sel">F93 fact.</div><div class="sel">F93 NC</div></div></div>
+<div class="sec"><div style="display:flex;justify-content:space-between"><b>3 · Informe diferido</b><span class="ok">✓</span></div><div class="mono" style="margin-top:6px;font-size:12px">Informe Diferido Septiembre Col.xlsx</div><div class="muted">224.564 comprobantes</div></div>
+<div class="sec"><span class="btn p" style="width:100%;justify-content:center">Guardar cierre</span></div></div>
+<div style="display:flex;flex-direction:column;gap:12px;min-width:0"><div class="kpis"><div class="card k"><div class="lbl">Gasto del mes</div><div class="v mono">$ 1.921.800.461,80</div></div><div class="card k"><div class="lbl">Ingreso F93/F94</div><div class="v mono">$ 9.967.394.031,15</div></div><div class="card k"><div class="lbl">Saldo 17109501</div><div class="v mono">$ 8.080.679.413,99</div></div></div>
+<div class="card"><div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center"><div class="seg2"><span class="on">Cálculo por cohorte</span><span>Asientos (16)</span><span>Controles (2)</span></div><span class="btn">Exportar Excel</span></div>
+<table><tr><th>Cohorte</th><th>Gasto del mes</th><th>Pendiente</th></tr><tr><td>Ene 2025</td><td class="n">63.654,29</td><td class="n">52.780,21</td></tr><tr><td>Jun 2025</td><td class="n">754.818,73</td><td class="n">0,00</td></tr><tr><td>Sep 2025</td><td class="n">42.550.257,26</td><td class="n">2.367.410,98</td></tr><tr><td>Oct 2025</td><td class="n">159.856.863,64</td><td class="n">50.022.818,65</td></tr><tr><td>Nov 2025</td><td class="n">164.574.902,41</td><td class="n">263.126.181,92</td></tr><tr><td>Dic 2025</td><td class="n">181.661.940,29</td><td class="n">456.032.861,36</td></tr><tr><td>Ene 2026</td><td class="n">213.580.144,52</td><td class="n">380.982.079,40</td></tr><tr><td>Feb 2026</td><td class="n">167.011.965,85</td><td class="n">569.847.203,86</td></tr><tr><td>Mar 2026</td><td class="n">189.685.872,49</td><td class="n">928.960.633,97</td></tr><tr><td>Abr 2026</td><td class="n">146.731.730,78</td><td class="n">807.364.655,67</td></tr></table></div></div></div></div></div></body></html>

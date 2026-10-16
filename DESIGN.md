@@ -34,6 +34,7 @@ colors:
   sidebar-accent-foreground: oklch(0.99 0.005 240)
   sidebar-border: oklch(1 0 0 / 0.14)
   sidebar-ring: oklch(0.78 0.12 235)
+  signal-ink: "#1F2733"
 typography:
   title:
     fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
@@ -125,6 +126,24 @@ components:
     textColor: "{colors.muted-foreground}"
     rounded: "{rounded.lg}"
     padding: "3rem 1.5rem"
+  siguiente-band:
+    backgroundColor: "{colors.signal-ink}"
+    textColor: "#FFFFFF"
+    typography: "{typography.title}"
+    rounded: "{rounded.lg}"
+    padding: "0.875rem 1.25rem"
+  paso-step:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.card-foreground}"
+    rounded: "{rounded.lg}"
+    padding: "1rem 1.25rem"
+  editable-number:
+    backgroundColor: "{colors.background}"
+    textColor: "{colors.foreground}"
+    typography: "{typography.mono}"
+    rounded: "{rounded.md}"
+    height: "2rem"
+    padding: "0 0.5rem"
 ---
 
 # Design System: SIICO Portal
@@ -169,6 +188,20 @@ The palette is built on three concentric layers of contrast: a Siigo blue sideba
 - **Coral** (`oklch(0.555 0.182 27)`): Destructive actions only (Eliminar registro, error toasts). High chroma so it never gets confused with the Siigo blue family. Never used for emphasis or branding.
 - **Status Tones** (project-local, not in frontmatter): Emerald (`oklch(0.6 0.16 160)` family), amber (`oklch(0.65 0.15 80)` family), sky (`oklch(0.6 0.12 230)` family), and rose. These tones power the KPI tile chips, status badges in the anticipos table, and overdue-date callouts. They are not theme tokens — they are functional role colors. They sit alongside Tailwind's stock emerald/amber/sky/rose ramps to keep them legible in both light and dark mode.
 
+### Signal (wayfinding)
+
+Introduced by the commission close (`calculo-comisiones`), where a multi-step monthly process is signposted rather than dashboarded.
+
+- **Signal Ink** (`signal-ink`, ≈ `oklch(0.27 0.025 258)`): The dark panel of the sticky "Siguiente" band. It sits inside the Slate-Blue family (hue ≈ 258°), so it reads as a deeper slate, not a new hue. White text on it, secondary text at `white/70`, a `white/10` ring. Identical in light and dark themes: the band is a sign, not a themed surface.
+- **Signal Amber** (Tailwind `amber-400`, text `amber-950`): The filled amber that marks *now*: the "Siguiente" tag, the current progress segment, the current step's numbered circle, and the current step's 1px border (`amber-400`, `amber-500/70` in dark).
+- **Done Emerald** (Tailwind `emerald-400` on ink; `emerald-600` circle on white, `emerald-500` in dark): Completed segments, the "Listo" tag, and done-step check circles.
+- **Pending Gray** (`white/25` on ink; `--muted` circle with `--muted-foreground` numeral on white): Steps not yet reached.
+
+### Category (ingreso / gasto)
+
+- **Ingreso Sky** (dot `sky-500`; header tint `sky-50` / `sky-800`, dark `sky-950/40` / `sky-200`): Everything that comes from invoicing income.
+- **Gasto Emerald** (dot `emerald-500`; header tint `emerald-50` / `emerald-800`, dark `emerald-950/40` / `emerald-200`): Everything that is commission expense. The mapping is defined once (`TONO_GRUPO` in `grupo.tsx`) and used on step labels, group headings, and grouped table headers alike.
+
 ### Chart
 
 - **Siigo Blue** (`oklch(0.66 0.17 235)`), **Teal** (`oklch(0.585 0.118 168)`), **Amber** (`oklch(0.625 0.142 64)`), **Coral** (`oklch(0.555 0.182 27)`), **Magenta** (`oklch(0.485 0.184 304)`): The five-color categorical palette for future charting. The Siigo blue slot anchors data viz to the brand.
@@ -186,7 +219,11 @@ The palette is built on three concentric layers of contrast: a Siigo blue sideba
 
 **The One-Voice Rule.** Siigo blue appears in roughly ≤10% of any given viewport (plus the sidebar, which earns its color from being brand chrome). It speaks for primary actions, the SIICO mark, and focus rings. It never co-occurs with another bright fill on the same screen — a Siigo blue button next to a coral destructive button on the same row breaks the rule.
 
-**The Chart-Only Hue Rule.** Hues other than Siigo blue exist exclusively inside data viz (chart slots 2–5 and KPI tone chips). Emerald/amber/sky/rose tones are status colors, not decorative accents; do not promote them into brand surfaces.
+**The Chart-Only Hue Rule.** Hues other than Siigo blue exist exclusively inside data viz (chart slots 2–5 and KPI tone chips). Emerald/amber/sky/rose tones are status colors, not decorative accents; do not promote them into brand surfaces. Two functional extensions are allowed: wayfinding state (amber = current, emerald = done) and a fixed data-category mapping (sky = ingreso, emerald = gasto), each defined once and applied identically everywhere it appears.
+
+**The Amber-Means-Now Rule.** A filled `amber-400` marks the single current step and nothing else: one tag, one progress segment, one circle, one border per screen. Warnings keep the tinted amber badge family (`amber-50` fill, `amber-700` text); they never use the filled signal amber.
+
+**The One-Mapping Rule.** A data category gets one color for the whole surface. Ingreso is sky and gasto is emerald on step labels, headings, and table group headers; a dot plus the word, never color alone.
 
 **The Slate-Blue Family Rule.** Neutrals and the primary accent share the cool blue hue family (235°–256°). Coral is the only escape hatch from this family, used solely for destructive intent.
 
@@ -209,6 +246,8 @@ The palette is built on three concentric layers of contrast: a Siigo blue sideba
 ### Named Rules
 
 **The Mono-Number Rule.** Whenever a number is stacked, sorted, or compared in a list, render it in IBM Plex Mono with `tabular-nums`. This includes KPI values, dates in tables, counts in pagination, and percent suffixes.
+
+**The Bare-Figure Rule.** In dense multi-column comparison tables (the cohort table), amounts drop the currency symbol and the caption above states the unit ("Valores en pesos"); the column of mono figures is the content. Single figures, step summaries, editable cells, and journal-entry lines keep the `$`.
 
 **The Uppercase-Label Rule.** Any text ≤ 12px that introduces a section, column, or group is uppercase + tracked + semibold. Mixed-case small text is reserved for prose.
 
@@ -242,6 +281,13 @@ The portal follows a fixed two-zone chrome (sticky topbar + persistent sidebar) 
 - Sheet/Drawer (anticipos mobile form): right edge on desktop (`sm:max-w-sm`), bottom-anchored on mobile.
 - 404 page: `max-w-md` centered in the viewport.
 
+**Stepped process surfaces (commission close):**
+- A single column of numbered steps stacked with `gap-3`, beneath a full-width sticky "Siguiente" band. The band is sticky only from `sm` (640px) up, pinned at `top-14` directly under the topbar, on a canvas-colored gutter (`bg-background`, `pt-3 pb-3`) so content scrolling beneath it doesn't show through. Below `sm` it scrolls with the page and stacks vertically (tag, message, progress, full-width action).
+- Steps carry `scroll-mt-44` so jumping to a step lands it below the sticky band.
+- Done steps collapse to one row; only the current step opens by default.
+
+**Wide tables:** The app shell's `SidebarInset` is `min-w-0`, so a table wider than the well scrolls inside its own `overflow-x-auto rounded-md border` wrapper (with an explicit `min-w-[...]`) instead of widening the page. The first column is sticky (`sticky left-0`, `bg-card` in body rows, `bg-muted` in header and total rows) so row identity stays visible while scrolling horizontally.
+
 ### Named Rules
 
 **The Single-Canvas Rule.** Each page renders inside exactly one max-width container (`max-w-7xl`). Nested max-widths are only allowed inside dialog/sheet content; never stack two global containers.
@@ -257,6 +303,7 @@ The system is structurally flat. Shadows are a response to elevation (a card, a 
 - **Resting card** (`0 1px 2px 0 rgb(0 0 0 / 0.05)`): Tailwind's `shadow-sm`. Applied via `shadow-sm` on `Card` and `button-default`. Subtle enough that a card looks like a sheet of paper on the canvas, not a lifted tile.
 - **Lifted surface** (`0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)`): Tailwind's `shadow-md`. Used on dropdown menu content, popovers, and select content.
 - **Modal** (`0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)`): Tailwind's `shadow-lg`. Used on dialog and sheet content.
+- **Sticky signal band**: the "Siguiente" band uses `shadow-md` plus a `ring-1 ring-white/10`, because it floats over scrolling content from `sm` up. It is the only in-flow surface that takes the lifted shadow.
 - **No shadow at all**: tables, rows, sidebar items, badges, KPI tile icon chips. They communicate state via background, border, or text — not via drop shadow.
 
 ### Focus Rings
@@ -355,6 +402,16 @@ Source: `src/components/ui/input.tsx`.
 - **Empty state (`Empty` + `EmptyHeader` + `EmptyMedia` + `EmptyTitle` + `EmptyDescription`):** Centered column with a dashed border, optional `size-10 rounded-full border bg-muted` icon container, title at `text-sm font-semibold text-foreground`, description at `text-sm text-muted-foreground`. Wrapped in a Card with `border-0 bg-transparent` when shown inside the data table so the table's border carries the structure.
 - **Login card:** A `rounded-lg border bg-card` with `p-8 sm:p-10`. The SIICO mark uses `font-mono text-sm font-semibold tracking-[0.14em]` — the only place in the portal where the brand mark is set in mono at a wider tracking than labels. The footer caption below the card is `font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground/70` — even quieter than group labels.
 
+### Wayfinding (stepped process)
+
+Source: `src/components/calculo-comisiones/` (`siguiente-band.tsx`, `paso.tsx`, `grupo.tsx`, `editable/editable-number.tsx`, `revision-panel.tsx`). A multi-step monthly process is a signposted route: one band always names the single next action and how much is left; the page is the steps in order.
+
+- **"Siguiente" band:** `rounded-lg` Signal Ink panel, `px-5 py-3.5`, `shadow-md` + `ring-1 ring-white/10`, `role="status" aria-live="polite"`. Left: a state tag (`rounded-md px-2 py-1 text-xs font-semibold`; amber "Siguiente" or "Procesando", emerald "Listo"). Middle: the message (`text-base font-semibold`) over one line of detail (`text-sm text-white/70`). Right: the count in mono (`font-mono text-base font-semibold tabular-nums`, "Paso N de 4" + `text-xs text-white/70` "· faltan N pasos", or "N de 4 completos" when done), a row of 4 progress segments (`h-1.5 w-10 rounded-full gap-1`: emerald done, amber current, `white/25` pending), and exactly one action (`Button size="sm" variant="secondary"`, e.g. "Ir al paso", "Exportar Excel"). The band re-signs itself after each step.
+- **Step (`Paso`):** a card (`rounded-lg border bg-card shadow-sm`) whose header is one full-width button (`px-5 py-4`, `aria-expanded`). Numbered circle `size-7 rounded-full font-mono text-xs font-semibold`: emerald with a check when done, amber with the numeral when current, muted gray when pending. Title `text-sm font-semibold`, optional category dot + label (`text-xs text-muted-foreground`), one truncated description line. Right side: done steps show their summary figure (`text-sm font-medium font-mono tabular-nums`, `text-xs` muted detail under it) plus "Editar" (`text-xs font-medium text-primary`); pending steps show "Pendiente" in muted `text-xs`. The current step's border becomes 1px amber. The open body sits under a `border-t` at `px-5 pb-5 pt-4`.
+- **Category marker (`GrupoTitulo`, `GrupoTh`):** a `size-1.5` dot in the category color beside the label. In tables, a grouped header row spans the ingreso and gasto columns with the category tint, and a `border-l` divider separates the groups.
+- **Editable currency cell (`EditableNumber`):** at rest it already looks like a field: `h-8 rounded-md border border-input bg-background px-2`, right-aligned mono tabular figure, a `size-3` pencil revealed on hover, border shifting to `ring/60` on hover, the standard focus ring. Click turns it into an `h-8` Input; Enter saves, Esc cancels, an invalid value shows `text-[11px] text-destructive` under it. Zero renders in `--muted-foreground`.
+- **Journal entry card:** each asiento is a bordered block with its title and a per-entry ghost "Copiar" (`size="sm"`, `h-7 px-2 text-xs`, copy icon) that copies tab-separated lines ready to paste into NetSuite or Excel and flips to a check + "Copiado" for 1.5s.
+
 ### Motion
 
 Motion is a closed vocabulary. Three durations, two easings, defined at `:root` in `globals.css`:
@@ -374,6 +431,9 @@ These tokens drive `auth-enter`, `auth-exit`, `nav-forward`, `nav-back` view-tra
 - **Do** pair the project motion tokens (`--duration-enter` 210ms with `--easing-enter` cubic-bezier(0.16, 1, 0.3, 1); `--duration-exit` 150ms with `--easing-exit` cubic-bezier(0.4, 0, 1, 1); `--duration-move` 400ms) for every new entrance and exit. Never introduce new durations.
 - **Do** ship loading, empty, error, and success states on every view that fetches or mutates data. The anticipos page is the reference: KPI tiles always render; the data table degrades to one of three Empty variants (no data, no matches with filters, generic empty).
 - **Do** use Spanish for every user-facing string. The product is monolingual in Spanish; English is only acceptable in code identifiers.
+- **Do** signpost multi-step processes with one sticky band naming the single next action and how many steps remain, above a single column of numbered steps; collapse done steps to their figure plus "Editar".
+- **Do** keep wide tables inside their own `overflow-x-auto` wrapper with a sticky first column; the page itself never scrolls sideways.
+- **Do** make inline-editable figures look editable at rest (input border, canvas fill, `h-8`), not like plain text that turns into a field on click.
 - **Do** maintain WCAG AA contrast in both themes. Foreground on background, primary on primary-foreground, and the four text tokens (foreground / muted-foreground / card-foreground / popover-foreground) on their respective surfaces.
 
 ### Don't
@@ -385,4 +445,5 @@ These tokens drive `auth-enter`, `auth-exit`, `nav-forward`, `nav-back` view-tra
 - **Don't** stack two filled buttons of different intents on the same row (e.g., a coral destructive button next to a primary CTA). Confirm destructive intent with an AlertDialog instead.
 - **Don't** use shadow as decoration on rows, list items, badges, or sidebar items. Shadows appear only on lifted surfaces (cards at rest, popovers, dialogs, sheets).
 - **Don't** break the 768px Surface Flip Rule: any centered modal-style surface must become a bottom-anchored Drawer below 768px. There is no third responsive behavior.
+- **Don't** use filled signal amber for anything but the current step, and don't remap a data category's color between sections of the same surface.
 - **Don't** let the topbar drift back to a translucent overlay. The white-on-canvas split is what makes the Three-Zone Contrast Rule work; a backdrop-blurred topbar collapses the canvas and the content well into one surface.

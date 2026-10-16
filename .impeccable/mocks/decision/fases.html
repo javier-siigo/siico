@@ -1,0 +1,40 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;color:#1F2733;background:#EEF3F9;display:flex}
+.mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.side{width:256px;background:#0088DA;color:#fff;padding:14px 10px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;gap:10px;align-items:center;padding:6px 8px 16px}.brand i{width:32px;height:32px;background:#fff;border-radius:8px}
+.brand b{display:block;font-size:14px}.brand small{font-size:11px;opacity:.7}
+.grp{font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;padding:12px 8px 4px}
+.it{padding:7px 8px;border-radius:6px}.it.on{background:#0064B8;font-weight:600}
+.sub{padding:5px 8px 5px 22px;font-size:12px;border-left:1px solid rgba(255,255,255,.15);margin-left:14px}.sub.on{background:#0064B8;border-radius:6px;font-weight:600}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;background:#fff;border-bottom:1px solid #D9E0E8;display:flex;align-items:center;padding:0 24px;gap:10px;font-size:13px;color:#5B6675}.top b{color:#1F2733}
+.well{padding:24px 32px;display:flex;flex-direction:column;gap:16px;overflow:hidden;flex:1}
+.card{background:#fff;border:1px solid #D9E0E8;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5B6675}
+.muted{color:#5B6675}.h1{font-size:16px;font-weight:600}
+.btn{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #D9E0E8;background:#fff}
+.btn.p{background:#0088DA;color:#fff;border-color:#0088DA}
+.sel{height:36px;border:1px solid #D9E0E8;border-radius:6px;padding:0 12px;display:inline-flex;align-items:center;gap:24px;background:#EEF3F9;color:#5B6675;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5B6675;font-weight:600;text-align:right;padding:8px 12px;background:#F4F7FA;border-bottom:1px solid #D9E0E8}
+th:first-child,td:first-child{text-align:left}
+td{padding:8px 12px;border-bottom:1px solid #E7ECF1;text-align:right}
+td.n{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.ok{color:#0B7A55}.warn{color:#9A6700}
+.strip{display:grid;grid-template-columns:repeat(4,1fr)}.seg{padding:14px 18px;border-left:1px dashed #D9E0E8}.seg:first-child{border-left:0}.seg .v{font-size:20px;font-weight:600;margin-top:6px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid #D9E0E8}.tab{padding:10px 16px;font-weight:500;color:#5B6675;display:flex;gap:8px;align-items:center}.tab.on{color:#1F2733;border-bottom:2px solid #0088DA;margin-bottom:-1px}
+.num{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;background:#E7ECF1}.num.d{background:#D7F2E6;color:#0B7A55}.row3{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}</style></head><body><aside class="side"><div class="brand"><i></i><div><b>SIICO</b><small>Portal contable</small></div></div>
+<div class="grp">Áreas</div><div class="it">Dashboard</div><div class="it">Conciliaciones</div><div class="it on">Ingresos</div>
+<div class="sub">Anticipos</div><div class="sub">Notas crédito</div><div class="sub on">Cálculo de comisiones</div></aside>
+<div class="main"><div class="top">Ingresos <span>/</span> <b>Cálculo de comisiones</b></div><div class="well"><div style="display:flex;justify-content:space-between;align-items:end"><div><div class="h1">Cálculo de comisiones</div><div class="muted" style="margin-top:4px">Cierre mensual: las comisiones se llevan al gasto al ritmo del ingreso de las facturas F93/F94.</div></div><div class="sel" style="background:#fff;color:#1F2733">Septiembre 2026 ▾</div></div><div class="card strip"><div class="seg"><div class="lbl">Ingreso F93/F94 del mes</div><div class="v mono">$ 9.967.394.031,15</div><div class="muted">16 cohortes</div></div>
+<div class="seg"><div class="lbl">Gasto de comisiones</div><div class="v mono">$ 1.921.800.461,80</div><div class="muted">incl. ajuste $ 754.818,73</div></div>
+<div class="seg"><div class="lbl">Saldo diferido 17109501</div><div class="v mono">$ 8.080.679.413,99</div><div class="muted">al 30 sep 2026</div></div>
+<div class="seg"><div class="lbl">Datos del mes</div><div class="v">2 de 3</div><div class="warn">Falta la facturación</div></div></div>
+<div class="tabs"><div class="tab on"><span class="num d">1</span>Datos del mes</div><div class="tab"><span class="num">2</span>Cálculo</div><div class="tab"><span class="num">3</span>Asientos</div><div class="tab" style="margin-left:auto">Seguimiento por cohorte</div></div>
+<div class="row3"><div class="card"><div style="padding:16px 18px;display:flex;justify-content:space-between"><b>Comisiones causadas</b><span class="ok">● Completo</span></div><table><tr><th>Concepto</th><th>Cuenta</th><th>Valor</th></tr><tr><td>Comisiones ventas</td><td class="n">52051801</td><td class="n">1.987.402.118,00</td></tr><tr><td>Incentivos</td><td class="n">52051802</td><td class="n">0,00</td></tr><tr><td>Bonificaciones ventas</td><td class="n">52054801</td><td class="n">241.880.302,00</td></tr><tr><td>Comisiones por ventas cruce</td><td class="n">52950502</td><td class="n">12.004.551,20</td></tr><tr><td><b>Total</b></td><td></td><td class="n"><b>2.241.286.971,20</b></td></tr></table></div>
+<div style="display:flex;flex-direction:column;gap:16px"><div class="card" style="padding:16px 18px"><div style="display:flex;justify-content:space-between"><b>Facturación F93/F94</b><span class="warn">● Pendiente</span></div><div class="muted" style="margin:6px 0 12px">Facturas y notas crédito emitidas en septiembre según NetSuite.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="sel">F94 facturas</div><div class="sel">F94 notas crédito</div><div class="sel">F93 facturas</div><div class="sel">F93 notas crédito</div></div></div>
+<div class="card" style="padding:16px 18px"><div style="display:flex;justify-content:space-between"><b>Informe diferido</b><span class="ok">● Leído</span></div><div class="mono" style="margin-top:8px">Informe Diferido Septiembre Col.xlsx</div><div class="muted">172 MB · 224.564 comprobantes · 11,8 s</div></div>
+<div style="display:flex;justify-content:flex-end"><span class="btn p">Continuar al cálculo →</span></div></div></div></div></div></body></html>

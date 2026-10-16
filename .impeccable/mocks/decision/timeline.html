@@ -1,0 +1,40 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;color:#1F2733;background:#EEF3F9;display:flex}
+.mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.side{width:256px;background:#0088DA;color:#fff;padding:14px 10px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;gap:10px;align-items:center;padding:6px 8px 16px}.brand i{width:32px;height:32px;background:#fff;border-radius:8px}
+.brand b{display:block;font-size:14px}.brand small{font-size:11px;opacity:.7}
+.grp{font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;padding:12px 8px 4px}
+.it{padding:7px 8px;border-radius:6px}.it.on{background:#0064B8;font-weight:600}
+.sub{padding:5px 8px 5px 22px;font-size:12px;border-left:1px solid rgba(255,255,255,.15);margin-left:14px}.sub.on{background:#0064B8;border-radius:6px;font-weight:600}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:56px;background:#fff;border-bottom:1px solid #D9E0E8;display:flex;align-items:center;padding:0 24px;gap:10px;font-size:13px;color:#5B6675}.top b{color:#1F2733}
+.well{padding:24px 32px;display:flex;flex-direction:column;gap:16px;overflow:hidden;flex:1}
+.card{background:#fff;border:1px solid #D9E0E8;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5B6675}
+.muted{color:#5B6675}.h1{font-size:16px;font-weight:600}
+.btn{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #D9E0E8;background:#fff}
+.btn.p{background:#0088DA;color:#fff;border-color:#0088DA}
+.sel{height:36px;border:1px solid #D9E0E8;border-radius:6px;padding:0 12px;display:inline-flex;align-items:center;gap:24px;background:#EEF3F9;color:#5B6675;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5B6675;font-weight:600;text-align:right;padding:8px 12px;background:#F4F7FA;border-bottom:1px solid #D9E0E8}
+th:first-child,td:first-child{text-align:left}
+td{padding:8px 12px;border-bottom:1px solid #E7ECF1;text-align:right}
+td.n{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+.ok{color:#0B7A55}.warn{color:#9A6700}
+.steps{display:grid;grid-template-columns:repeat(5,1fr)}.st{display:flex;gap:10px;align-items:center;padding:14px 16px;border-right:1px solid #E7ECF1}.st:last-child{border:0}
+.c{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;font-weight:600;background:#E7ECF1;color:#5B6675;flex-shrink:0}.c.d{background:#0E9F6E;color:#fff}.c.a{background:#0088DA;color:#fff}
+.done{display:flex;justify-content:space-between;align-items:center;padding:12px 18px}</style></head><body><aside class="side"><div class="brand"><i></i><div><b>SIICO</b><small>Portal contable</small></div></div>
+<div class="grp">Áreas</div><div class="it">Dashboard</div><div class="it">Conciliaciones</div><div class="it on">Ingresos</div>
+<div class="sub">Anticipos</div><div class="sub">Notas crédito</div><div class="sub on">Cálculo de comisiones</div></aside>
+<div class="main"><div class="top">Ingresos <span>/</span> <b>Cálculo de comisiones</b></div><div class="well"><div style="display:flex;justify-content:space-between;align-items:end"><div><div class="h1">Cálculo de comisiones</div><div class="muted" style="margin-top:4px">Cierre mensual: las comisiones se llevan al gasto al ritmo del ingreso de las facturas F93/F94.</div></div><div class="sel" style="background:#fff;color:#1F2733">Septiembre 2026 ▾</div></div><div class="card steps"><div class="st"><span class="c d">✓</span><div><b>Comisiones</b><div class="muted mono">$ 2.241.286.971,20</div></div></div>
+<div class="st"><span class="c a">2</span><div><b>Facturación</b><div class="muted">En curso</div></div></div>
+<div class="st"><span class="c d">✓</span><div><b>Informe diferido</b><div class="muted">16 cohortes</div></div></div>
+<div class="st"><span class="c">4</span><div><b>Revisión</b><div class="muted">Controles</div></div></div>
+<div class="st"><span class="c">5</span><div><b>Asientos</b><div class="muted">Para NetSuite</div></div></div></div>
+<div class="card done"><div><span class="c d" style="margin-right:10px">✓</span><b>Comisiones causadas</b> <span class="muted">· 4 conceptos</span></div><div><span class="mono">$ 2.241.286.971,20</span> <span class="btn" style="margin-left:12px">Editar</span></div></div>
+<div class="card" style="padding:20px 22px"><div class="h1">2 · Facturación del mes</div><div class="muted" style="margin-top:4px">Facturas y notas crédito F93/F94 emitidas en septiembre 2026, según NetSuite. El neto es la base del % de esta cohorte.</div>
+<table style="margin-top:16px"><tr><th>Tipo</th><th>Facturas emitidas</th><th>Notas crédito</th><th>Neto</th></tr><tr><td class="n">F94</td><td><span class="sel" style="width:220px"></span></td><td><span class="sel" style="width:220px"></span></td><td class="n">—</td></tr><tr><td class="n">F93</td><td><span class="sel" style="width:220px"></span></td><td><span class="sel" style="width:220px"></span></td><td class="n">—</td></tr></table>
+<div style="display:flex;justify-content:flex-end;margin-top:16px;gap:8px"><span class="btn">Atrás</span><span class="btn p">Guardar y continuar</span></div></div>
+<div class="card done"><div><span class="c d" style="margin-right:10px">✓</span><b>Informe diferido</b> <span class="muted">· Informe Diferido Septiembre Col.xlsx</span></div><div><span class="mono">$ 9.967.394.031,15</span> <span class="btn" style="margin-left:12px">Cambiar</span></div></div></div></div></body></html>
