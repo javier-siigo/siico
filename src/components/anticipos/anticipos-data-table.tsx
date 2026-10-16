@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTransition } from "react";
+import type { CSSProperties } from "react";
 import {
   type ColumnFiltersState,
   type ColumnSizingState,
@@ -165,7 +166,7 @@ function RowActionsDropdown({
 const DEFAULT_PAGE_SIZE = 5;
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100] as const;
 const ALL = "__all__";
-const COLUMN_SIZING_STORAGE_KEY = "siico:anticipos:columnSizing:v1";
+const COLUMN_SIZING_STORAGE_KEY = "siico:anticipos:columnSizing:v2";
 
 function loadColumnSizing(): ColumnSizingState {
   if (typeof window === "undefined") return {};
@@ -309,8 +310,8 @@ export function AnticiposDataTable({
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
-        size: 56,
-        minSize: 56,
+        size: 50,
+        minSize: 48,
       }),
     [onEdit, onDelete],
   );
@@ -319,6 +320,8 @@ export function AnticiposDataTable({
     () => [...columns, actionsColumn],
     [actionsColumn],
   );
+
+  const tableRef = React.useRef<HTMLTableElement>(null);
 
   const table = useTable({
     features,
@@ -353,6 +356,69 @@ export function AnticiposDataTable({
     },
     getRowId: (row) => row.id,
   });
+
+  const totalCurrentSize = React.useMemo(
+    () =>
+      table.getAllColumns().reduce((acc, c) => acc + c.getSize(), 0) || 1,
+    [table],
+  );
+
+  const cellWidthStyle = React.useCallback(
+    (size: number, minSize?: number): CSSProperties => {
+      const pct = (size / totalCurrentSize) * 100;
+      return {
+        width: `${pct}%`,
+        minWidth: minSize ? `${minSize}px` : undefined,
+      };
+    },
+    [totalCurrentSize],
+  );
+
+  const autoFitColumn = React.useCallback(
+    (columnId: string) => {
+      const tableEl = tableRef.current;
+      if (!tableEl) return;
+
+      const cells = tableEl.querySelectorAll<HTMLElement>(
+        `[data-column-id="${CSS.escape(columnId)}"]`,
+      );
+      if (cells.length === 0) return;
+
+      const probe = document.createElement("div");
+      probe.style.cssText =
+        "position:absolute;visibility:hidden;left:-9999px;top:0;width:auto;min-width:0;max-width:none;";
+      document.body.appendChild(probe);
+
+      let maxWidth = 0;
+      for (const cell of cells) {
+        const clone = cell.cloneNode(true) as HTMLElement;
+        clone.removeAttribute("style");
+        clone.style.cssText = probe.style.cssText;
+        probe.appendChild(clone);
+        const w = clone.scrollWidth;
+        if (w > maxWidth) maxWidth = w;
+        probe.removeChild(clone);
+      }
+      document.body.removeChild(probe);
+
+      const cs = window.getComputedStyle(cells[0]!);
+      const paddingX =
+        parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      const measured = Math.ceil(maxWidth + paddingX);
+
+      const column = table.getColumn(columnId);
+      const minSize =
+        (column?.columnDef.minSize as number | undefined) ?? 0;
+      const capped = Math.min(Math.max(measured, minSize), 600);
+
+      setColumnSizing((prev) => {
+        const next = { ...prev, [columnId]: capped };
+        saveColumnSizing(next);
+        return next;
+      });
+    },
+    [table],
+  );
 
   const totalRows = rows.length;
   const totalFiltered = table.getFilteredRowModel().rows.length;
@@ -500,8 +566,7 @@ export function AnticiposDataTable({
       {visibleRows.length ? (
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
+            <Table ref={tableRef} className="table-fixed">
               <TableHeader className="bg-muted/40">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
@@ -515,7 +580,11 @@ export function AnticiposDataTable({
                       return (
                         <TableHead
                           key={header.id}
-                          style={{ width: header.getSize() || undefined }}
+                          data-column-id={header.column.id}
+                          style={cellWidthStyle(
+                            header.getSize(),
+                            header.column.columnDef.minSize as number | undefined,
+                          )}
                           className={cn(
                             "relative h-9 align-bottom",
                             isActions &&
@@ -529,9 +598,14 @@ export function AnticiposDataTable({
                             <div
                               role="separator"
                               aria-orientation="vertical"
-                              aria-label={`Redimensionar columna ${header.column.id}`}
+                              aria-label={`Redimensionar ${header.column.id} (doble clic para auto-ajustar)`}
                               onMouseDown={header.getResizeHandler()}
                               onTouchStart={header.getResizeHandler()}
+                              onDoubleClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                autoFitColumn(header.column.id);
+                              }}
                               className="group/resize absolute top-0 right-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize touch-none select-none items-center justify-center"
                             >
                               <span
@@ -570,14 +644,18 @@ export function AnticiposDataTable({
                         return (
                           <TableCell
                             key={cell.id}
+                            data-column-id={cell.column.id}
                             className={cn(
                               "py-2.5",
                               isActions &&
                                 "sticky right-0 z-10 border-l border-border bg-card",
                             )}
-                            style={{
-                              width: cell.column.getSize() || undefined,
-                            }}
+                            style={cellWidthStyle(
+                              cell.column.getSize(),
+                              cell.column.columnDef.minSize as
+                                | number
+                                | undefined,
+                            )}
                           >
                             <table.FlexRender cell={cell} />
                           </TableCell>
@@ -588,7 +666,6 @@ export function AnticiposDataTable({
                 })}
               </TableBody>
             </Table>
-            </div>
           </CardContent>
         </Card>
       ) : hasFilters ? (

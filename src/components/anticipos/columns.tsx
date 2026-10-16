@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { Column, RowData } from "@tanstack/table-core";
-import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, UserMinus } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, CircleAlert, UserMinus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { TruncatedText } from "@/components/anticipos/truncated-text";
 import {
   ANTICIPOS_FALTA_LABELS,
   ANTICIPOS_OBSERVACION_1_LABELS,
@@ -21,6 +22,10 @@ import {
   type AnticipoObservacion1,
   type AnticipoRow,
 } from "@/lib/anticipos/schema";
+import {
+  formatAnticipoCedula,
+  formatAnticipoCurrency,
+} from "@/lib/anticipos/format";
 
 import type { DataTableFeatures } from "./data-table-features";
 
@@ -37,6 +42,37 @@ function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   if (!y || !m || !d) return iso;
   return dateFmt.format(new Date(Date.UTC(y, m - 1, d)));
+}
+
+type MatchLevel = NonNullable<AnticipoRow["retiro_info"]>["nivel"];
+
+const MATCH_LABELS: Record<MatchLevel, string> = {
+  exacto: "Coinc. exacta",
+  exacto_inverso: "Coinc. exacta (orden invertido)",
+  parcial: "Coinc. parcial",
+};
+
+function ExcolaboradorChip({ parcial }: { parcial: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-5 shrink-0 items-center gap-1 rounded-md border px-1.5",
+        "border-slate-300 bg-slate-50 text-slate-700",
+        "dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300",
+      )}
+    >
+      {parcial ? (
+        <CircleAlert
+          className="size-3 text-amber-600 dark:text-amber-400"
+          aria-hidden
+        />
+      ) : null}
+      <UserMinus className="size-3" aria-hidden />
+      <span className="text-[10px] font-semibold uppercase tracking-wider">
+        Excolaborador
+      </span>
+    </span>
+  );
 }
 
 function faltaToneClass(value: AnticipoFalta): string {
@@ -120,8 +156,8 @@ export const columns = columnHelper.columns([
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 48,
-    minSize: 40,
+    size: 40,
+    minSize: 36,
   }),
   columnHelper.accessor("nombre", {
     header: ({ column }) => (
@@ -131,81 +167,98 @@ export const columns = columnHelper.columns([
       const r = row.original;
       const esRetirado = r.es_retirado;
       const retiro = r.retiro_info;
-      const valorFmt =
-        retiro?.valor != null
-          ? new Intl.NumberFormat("es-CO", {
-              style: "currency",
-              currency: "COP",
-              maximumFractionDigits: 0,
-            }).format(retiro.valor)
-          : null;
+      const valorFmt = formatAnticipoCurrency(retiro?.valor);
+      const cedulaFmt = retiro ? formatAnticipoCedula(retiro.cedula) : null;
+      const isParcial =
+        retiro?.nivel === "parcial" && retiro.tokensExtra.length > 0;
+      const matchLabel = retiro ? MATCH_LABELS[retiro.nivel] : null;
+
       return (
-        <div className="flex min-w-0 flex-col gap-1">
-          <span
-            className={cn(
-              "truncate font-medium",
-              esRetirado ? "text-muted-foreground" : "text-foreground",
-            )}
-          >
-            {r.nombre}
-          </span>
-          {esRetirado ? (
-            <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <TruncatedText
+              text={r.nombre}
+              className={cn(
+                "font-medium",
+                esRetirado ? "text-muted-foreground" : "text-foreground",
+              )}
+            />
+            {esRetirado ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge
-                    variant="outline"
-                    className="cursor-default gap-1 border-muted-foreground/30 bg-muted/60 px-1.5 py-0 font-medium text-muted-foreground"
-                  >
-                    <UserMinus className="size-3" aria-hidden />
-                    Excolaborador
-                  </Badge>
+                  <ExcolaboradorChip parcial={isParcial} />
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
                   className="max-w-sm whitespace-pre-wrap break-words"
                 >
-                  <div className="flex flex-col gap-1">
-                    <span className="font-semibold">Excolaborador</span>
-                    {retiro ? (
-                      <>
+                  {retiro ? (
+                    <div className="flex flex-col gap-1">
+                      {retiro.observacion ? (
                         <span className="text-muted-foreground">
-                          Cédula: {retiro.cedula}
+                          Obs. Contabilidad: {retiro.observacion}
                         </span>
-                        {valorFmt ? (
-                          <span className="text-muted-foreground">
-                            Anticipo reportado: {valorFmt}
-                          </span>
-                        ) : null}
-                        {retiro.observacion ? (
-                          <span className="text-muted-foreground">
-                            Obs. Contabilidad: {retiro.observacion}
-                          </span>
-                        ) : null}
-                      </>
-                    ) : null}
-                  </div>
+                      ) : null}
+                      <span className="text-muted-foreground">
+                        Reportado: {formatDate(retiro.fecha_reporte)}
+                      </span>
+                      {retiro.tokensComunes.length > 0 ? (
+                        <span className="text-muted-foreground">
+                          Comunes: {retiro.tokensComunes.join(" ")}
+                        </span>
+                      ) : null}
+                      {retiro.tokensExtra.length > 0 ? (
+                        <span className="text-muted-foreground">
+                          Extras: {retiro.tokensExtra.join(" ")}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </TooltipContent>
               </Tooltip>
+            ) : null}
+          </div>
+          {esRetirado && retiro ? (
+            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-mono text-[11px] tabular-nums text-muted-foreground">
+              {cedulaFmt ? (
+                <span className="whitespace-nowrap">Céd. {cedulaFmt}</span>
+              ) : null}
+              {valorFmt ? (
+                <>
+                  <span className="text-muted-foreground/40" aria-hidden>
+                    ·
+                  </span>
+                  <span className="whitespace-nowrap">Ant. {valorFmt}</span>
+                </>
+              ) : null}
+              {matchLabel ? (
+                <>
+                  <span className="text-muted-foreground/40" aria-hidden>
+                    ·
+                  </span>
+                  <span className="whitespace-nowrap">{matchLabel}</span>
+                </>
+              ) : null}
             </div>
           ) : null}
         </div>
       );
     },
     size: 240,
-    minSize: 160,
+    minSize: 140,
   }),
   columnHelper.accessor("requerimiento", {
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Requerimiento" />
     ),
     cell: ({ row }) => (
-      <span className="block max-w-[16rem] truncate font-mono text-xs text-muted-foreground">
-        {row.getValue("requerimiento")}
-      </span>
+      <TruncatedText
+        text={String(row.getValue("requerimiento") ?? "")}
+        className="block max-w-[14rem] font-mono text-[11px] tabular-nums text-muted-foreground"
+      />
     ),
-    size: 180,
-    minSize: 140,
+    size: 120,
+    minSize: 120,
   }),
   columnHelper.accessor("falta", {
     header: ({ column }) => (
@@ -217,7 +270,10 @@ export const columns = columnHelper.columns([
         <Badge
           variant="outline"
           data-falta-badge="true"
-          className={cn("font-medium", faltaToneClass(value))}
+          className={cn(
+            "max-w-full truncate font-medium",
+            faltaToneClass(value),
+          )}
         >
           <span
             aria-hidden
@@ -233,13 +289,13 @@ export const columns = columnHelper.columns([
                 "bg-muted-foreground",
             )}
           />
-          {ANTICIPOS_FALTA_LABELS[value]}
+          <TruncatedText text={ANTICIPOS_FALTA_LABELS[value]} />
         </Badge>
       );
     },
     enableColumnFilter: false,
-    size: 200,
-    minSize: 140,
+    size: 130,
+    minSize: 130,
   }),
   columnHelper.accessor("observacion_1", {
     header: ({ column }) => (
@@ -250,7 +306,10 @@ export const columns = columnHelper.columns([
       return (
         <Badge
           variant="outline"
-          className={cn("font-medium", observacionToneClass(value))}
+          className={cn(
+            "max-w-full truncate font-medium",
+            observacionToneClass(value),
+          )}
         >
           <span
             aria-hidden
@@ -263,13 +322,13 @@ export const columns = columnHelper.columns([
                 "bg-muted-foreground",
             )}
           />
-          {ANTICIPOS_OBSERVACION_1_LABELS[value]}
+          <TruncatedText text={ANTICIPOS_OBSERVACION_1_LABELS[value]} />
         </Badge>
       );
     },
     enableColumnFilter: false,
-    size: 200,
-    minSize: 140,
+    size: 130,
+    minSize: 130,
   }),
   columnHelper.accessor("observacion_2", {
     header: ({ column }) => (
@@ -281,23 +340,14 @@ export const columns = columnHelper.columns([
         return <span className="text-muted-foreground/60">—</span>;
       }
       return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="block max-w-[20rem] truncate text-sm text-muted-foreground">
-              {v}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent
-            side="top"
-            className="max-w-sm whitespace-pre-wrap break-words"
-          >
-            {v}
-          </TooltipContent>
-        </Tooltip>
+        <TruncatedText
+          text={v}
+          className="block max-w-[20rem] text-sm text-muted-foreground"
+        />
       );
     },
-    size: 240,
-    minSize: 160,
+    size: 130,
+    minSize: 120,
   }),
   columnHelper.accessor("fecha_rq", {
     header: ({ column }) => (
@@ -340,8 +390,8 @@ export const columns = columnHelper.columns([
         </span>
       );
     },
-    size: 110,
-    minSize: 96,
+    size: 80,
+    minSize: 88,
   }),
   columnHelper.accessor("fecha_gestion", {
     header: ({ column }) => (
@@ -352,7 +402,7 @@ export const columns = columnHelper.columns([
         {formatDate(row.getValue("fecha_gestion"))}
       </span>
     ),
-    size: 130,
-    minSize: 110,
+    size: 80,
+    minSize: 96,
   }),
 ]);

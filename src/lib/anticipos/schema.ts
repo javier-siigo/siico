@@ -151,6 +151,9 @@ export type AnticipoRow = {
     valor: number | null;
     observacion: string | null;
     fecha_reporte: string;
+    nivel: "exacto" | "exacto_inverso" | "parcial";
+    tokensComunes: string[];
+    tokensExtra: string[];
   } | null;
 };
 

@@ -190,6 +190,37 @@ export type Database = {
     }
     Functions: {
       current_user_has_role: { Args: { check_role: string }; Returns: boolean }
+      match_colaborador_retirado: {
+        Args: { p_input: string }
+        Returns: {
+          cedula: number
+          fecha_reporte: string
+          nivel: string
+          nombre: string
+          observacion: string | null
+          tokens_comunes: string[]
+          tokens_extra: string[]
+          valor: number | null
+        }[]
+      }
+      match_colaborador_retirado_batch: {
+        Args: { p_inputs: string[] }
+        Returns: {
+          cedula: number
+          fecha_reporte: string
+          nivel: string
+          nombre: string
+          observacion: string | null
+          query: string
+          tokens_comunes: string[]
+          tokens_extra: string[]
+          valor: number | null
+        }[]
+      }
+      normalize_colaborador_name_unsorted: {
+        Args: { n: string }
+        Returns: string
+      }
     }
     Enums: {
       anticipos_falta_enum:

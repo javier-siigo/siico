@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "import:retirados": "tsx scripts/import-retirados.ts"
+    "import:retirados": "tsx scripts/import-retirados.ts",
+    "match:retirado": "tsx scripts/match-retirado.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
