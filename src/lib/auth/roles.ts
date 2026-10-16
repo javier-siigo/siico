@@ -9,6 +9,8 @@ import type { Proceso } from "@/lib/navigation";
 import {
   EMPTY_ROLES,
   isAdmin,
+  hasRole,
+  ROLE_INGRESOS,
   canAccessProceso,
   type UserRolesInfo,
 } from "./roles-shared";
@@ -55,6 +57,11 @@ export async function getUserRoles(userId: string): Promise<UserRolesInfo> {
 
 export async function requireAdmin(info: UserRolesInfo): Promise<void> {
   if (!isAdmin(info)) notFound();
+}
+
+export function hasIngresosOrAdmin(info: UserRolesInfo): boolean {
+  if (isAdmin(info)) return true;
+  return hasRole(info, ROLE_INGRESOS);
 }
 
 export async function requireProcesoAccess(

@@ -144,6 +144,14 @@ export type AnticipoRow = {
   fecha_rq: string;
   fecha_gestion: string | null;
   created_at: string;
+  es_retirado: boolean;
+  retiro_info: {
+    cedula: number;
+    nombre: string;
+    valor: number | null;
+    observacion: string | null;
+    fecha_reporte: string;
+  } | null;
 };
 
 export type AnticipoListResult = {

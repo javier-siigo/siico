@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   HandCoins,
   Plus,
+  UserMinus,
   Wallet,
 } from "lucide-react";
 
@@ -14,6 +15,7 @@ import { AnticiposDataTable } from "@/components/anticipos/anticipos-data-table"
 import { AnticiposDeleteDialog } from "@/components/anticipos/anticipos-delete-dialog";
 import { AnticiposEditSheet } from "@/components/anticipos/anticipos-edit-sheet";
 import { AnticiposFormSheet } from "@/components/anticipos/anticipos-form";
+import { ImportarRetiradosSheet } from "@/components/anticipos/importar-retirados/importar-retirados-sheet";
 import type { AnticipoRow } from "@/lib/anticipos/schema";
 
 const HIGHLIGHT_ADD_MS = 720;
@@ -33,6 +35,7 @@ function isLegalizadoFalta(value: AnticipoRow["falta"]): boolean {
 
 export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
   const [open, setOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<AnticipoRow | null>(null);
   const [deletingRow, setDeletingRow] = useState<AnticipoRow | null>(null);
   const [highlightedRowIds, setHighlightedRowIds] = useState<{
@@ -113,15 +116,36 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
     const devoluciones = rows.filter((r) => isDevolucionFalta(r.falta)).length;
     const legalizados = rows.filter((r) => isLegalizadoFalta(r.falta)).length;
     const tasaLegalizacion = total === 0 ? 0 : Math.round((legalizados / total) * 100);
-    return { total, pendientes, devoluciones, legalizados, tasaLegalizacion };
+    const excolaboradores = rows.filter((r) => r.es_retirado).length;
+    const valorPendienteRetirados = rows
+      .filter((r) => r.es_retirado && isPendienteFalta(r.falta))
+      .reduce((acc, r) => acc + (r.retiro_info?.valor ?? 0), 0);
+    return {
+      total,
+      pendientes,
+      devoluciones,
+      legalizados,
+      tasaLegalizacion,
+      excolaboradores,
+      valorPendienteRetirados,
+    };
   }, [rows]);
+
+  const valorFmt = useMemo(() => {
+    if (stats.valorPendienteRetirados <= 0) return null;
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    }).format(stats.valorPendienteRetirados);
+  }, [stats.valorPendienteRetirados]);
 
   const closeEdit = useCallback(() => setEditingRow(null), []);
   const closeDelete = useCallback(() => setDeletingRow(null), []);
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <KpiTile
           icon={<HandCoins className="size-4" />}
           label="Total registros"
@@ -157,26 +181,48 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
             ) : null
           }
         />
+        <KpiTile
+          icon={<UserMinus className="size-4" />}
+          label="Excolaboradores"
+          value={stats.excolaboradores}
+          tone="muted"
+          staggerIndex={4}
+          suffix={
+            valorFmt ? (
+              <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
+                Pendiente: {valorFmt}
+              </span>
+            ) : null
+          }
+          action={
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              onClick={() => setImportOpen(true)}
+              className="h-auto p-0 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              {stats.excolaboradores > 0
+                ? "Actualizar reporte →"
+                : "Importar reporte →"}
+            </Button>
+          }
+        />
       </div>
 
       <div className="flex flex-col gap-3">
-        <div
-          className={
-            rows.length > 0
-              ? "flex flex-col-reverse items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-3"
-              : "flex justify-end"
-          }
-        >
-          {rows.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              Edita, legaliza o elimina cualquier registro desde el menú de
-              acciones de cada fila.
-            </p>
-          )}
-          <Button type="button" onClick={() => setOpen(true)}>
-            <Plus className="size-4" />
-            Nuevo registro
-          </Button>
+        <div className="flex flex-col-reverse items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <p className="text-sm text-muted-foreground">
+            Gestiona y legaliza los anticipos por colaborador y
+            requerimiento. Importa el reporte de Contabilidad para cruzar
+            excolaboradores retirados.
+          </p>
+          <div className="flex shrink-0">
+            <Button type="button" onClick={() => setOpen(true)}>
+              <Plus className="size-4" />
+              Nuevo registro
+            </Button>
+          </div>
         </div>
 
         <AnticiposDataTable
@@ -188,6 +234,7 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
       </div>
 
       <AnticiposFormSheet open={open} onOpenChange={setOpen} />
+      <ImportarRetiradosSheet open={importOpen} onOpenChange={setImportOpen} />
       <AnticiposEditSheet
         row={editingRow}
         open={Boolean(editingRow)}
@@ -210,6 +257,7 @@ interface KpiTileProps {
   value: number;
   tone?: KpiTone;
   suffix?: React.ReactNode;
+  action?: React.ReactNode;
   staggerIndex: number;
 }
 
@@ -232,30 +280,36 @@ function KpiTile({
   value,
   tone = "default",
   suffix,
+  action,
   staggerIndex,
 }: KpiTileProps) {
   return (
     <div
-      className="kpi-tile-stagger flex items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-sm"
+      className="kpi-tile-stagger flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-sm"
       style={{ animationDelay: `${staggerIndex * 40}ms` }}
     >
-      <div
-        className={`flex size-9 shrink-0 items-center justify-center rounded-md border ${TONE_CLASSES[tone]}`}
-        aria-hidden
-      >
-        {icon}
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          {label}
-        </span>
-        <div className="flex items-baseline gap-2">
-          <span className="font-mono text-xl font-semibold tabular-nums text-foreground">
-            {value}
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex size-9 shrink-0 items-center justify-center rounded-md border ${TONE_CLASSES[tone]}`}
+          aria-hidden
+        >
+          {icon}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {label}
           </span>
-          {suffix}
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-xl font-semibold tabular-nums text-foreground">
+              {value}
+            </span>
+            {suffix}
+          </div>
         </div>
       </div>
+      {action ? (
+        <div className="flex justify-end">{action}</div>
+      ) : null}
     </div>
   );
 }

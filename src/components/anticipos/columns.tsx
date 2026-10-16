@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import type { Column, RowData } from "@tanstack/table-core";
-import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, UserMinus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -127,15 +127,73 @@ export const columns = columnHelper.columns([
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Colaborador" />
     ),
-    cell: ({ row }) => (
-      <div className="flex min-w-0 flex-col">
-        <span className="truncate font-medium text-foreground">
-          {row.getValue("nombre")}
-        </span>
-      </div>
-    ),
-    size: 200,
-    minSize: 140,
+    cell: ({ row }) => {
+      const r = row.original;
+      const esRetirado = r.es_retirado;
+      const retiro = r.retiro_info;
+      const valorFmt =
+        retiro?.valor != null
+          ? new Intl.NumberFormat("es-CO", {
+              style: "currency",
+              currency: "COP",
+              maximumFractionDigits: 0,
+            }).format(retiro.valor)
+          : null;
+      return (
+        <div className="flex min-w-0 flex-col gap-1">
+          <span
+            className={cn(
+              "truncate font-medium",
+              esRetirado ? "text-muted-foreground" : "text-foreground",
+            )}
+          >
+            {r.nombre}
+          </span>
+          {esRetirado ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant="outline"
+                    className="cursor-default gap-1 border-muted-foreground/30 bg-muted/60 px-1.5 py-0 font-medium text-muted-foreground"
+                  >
+                    <UserMinus className="size-3" aria-hidden />
+                    Excolaborador
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="max-w-sm whitespace-pre-wrap break-words"
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className="font-semibold">Excolaborador</span>
+                    {retiro ? (
+                      <>
+                        <span className="text-muted-foreground">
+                          Cédula: {retiro.cedula}
+                        </span>
+                        {valorFmt ? (
+                          <span className="text-muted-foreground">
+                            Anticipo reportado: {valorFmt}
+                          </span>
+                        ) : null}
+                        {retiro.observacion ? (
+                          <span className="text-muted-foreground">
+                            Obs. Contabilidad: {retiro.observacion}
+                          </span>
+                        ) : null}
+                      </>
+                    ) : null}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          ) : null}
+        </div>
+      );
+    },
+    size: 240,
+    minSize: 160,
   }),
   columnHelper.accessor("requerimiento", {
     header: ({ column }) => (

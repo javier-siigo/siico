@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import Script from "next/script";
 
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { THEME_INIT_SCRIPT } from "@/components/layout/theme-init-script";
 
 import "./globals.css";
 
@@ -41,12 +43,10 @@ export default function RootLayout({
       className={`${plexSans.variable} ${plexMono.variable}`}
     >
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Script id="siico-theme-init" strategy="beforeInteractive">
+          {THEME_INIT_SCRIPT}
+        </Script>
+        <ThemeProvider defaultTheme="system">
           {children}
           <Toaster />
         </ThemeProvider>

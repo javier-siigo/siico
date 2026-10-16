@@ -21,6 +21,7 @@ import {
   Pencil,
   Search,
   Trash2,
+  UserMinus,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -253,6 +254,7 @@ export function AnticiposDataTable({
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [faltaFilter, setFaltaFilter] = React.useState<string>("");
   const [observacion1Filter, setObservacion1Filter] = React.useState<string>("");
+  const [onlyRetirados, setOnlyRetirados] = React.useState(false);
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState<number>(DEFAULT_PAGE_SIZE);
 
@@ -272,6 +274,7 @@ export function AnticiposDataTable({
 
   const filteredRows = React.useMemo(() => {
     return rows.filter((row) => {
+      if (onlyRetirados && !row.es_retirado) return false;
       if (!matchesEnum<AnticipoFalta>(row.falta, faltaFilter)) return false;
       if (!matchesEnum<AnticipoObservacion1>(row.observacion_1, observacion1Filter))
         return false;
@@ -283,11 +286,11 @@ export function AnticiposDataTable({
       }
       return true;
     });
-  }, [rows, faltaFilter, observacion1Filter, globalFilter]);
+  }, [rows, faltaFilter, observacion1Filter, globalFilter, onlyRetirados]);
 
   React.useEffect(() => {
     setPageIndex(0);
-  }, [pageSize, faltaFilter, observacion1Filter, globalFilter]);
+  }, [pageSize, faltaFilter, observacion1Filter, globalFilter, onlyRetirados]);
 
   const actionsColumn = React.useMemo(
     () =>
@@ -360,12 +363,14 @@ export function AnticiposDataTable({
   const hasFilters =
     faltaFilter !== "" ||
     observacion1Filter !== "" ||
-    globalFilter.trim().length > 0;
+    globalFilter.trim().length > 0 ||
+    onlyRetirados;
 
   const resetFilters = () => {
     setFaltaFilter("");
     setObservacion1Filter("");
     setGlobalFilter("");
+    setOnlyRetirados(false);
   };
 
   const faltaActive = faltaFilter !== "";
@@ -418,6 +423,23 @@ export function AnticiposDataTable({
             ([value, label]) => ({ value, label }),
           )}
         />
+
+        <Button
+          type="button"
+          variant={onlyRetirados ? "default" : "outline"}
+          size="sm"
+          onClick={() => setOnlyRetirados((v) => !v)}
+          aria-pressed={onlyRetirados}
+          aria-label="Mostrar sólo excolaboradores"
+          className={cn(
+            "h-9 gap-1.5 text-xs",
+            onlyRetirados &&
+              "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15",
+          )}
+        >
+          <UserMinus className="size-3.5" />
+          Excolaboradores
+        </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -535,10 +557,11 @@ export function AnticiposDataTable({
                   const justAdded = highlightedRowIds?.added?.has(id) ?? false;
                   const justLegalized =
                     highlightedRowIds?.legalized?.has(id) ?? false;
+                  const isRetirado = row.original.es_retirado;
                   return (
                     <TableRow
                       key={id}
-                      className="group"
+                      className={cn("group", isRetirado && "bg-muted/30")}
                       data-just-added={justAdded ? "true" : undefined}
                       data-just-legalized={justLegalized ? "true" : undefined}
                     >

@@ -23,6 +23,7 @@ export type Database = {
           fecha_rq: string
           id: string
           nombre: string
+          nombre_normalizado: string | null
           observacion_1: Database["public"]["Enums"]["anticipos_observacion_1_enum"]
           observacion_2: string | null
           requerimiento: string
@@ -56,6 +57,67 @@ export type Database = {
           requerimiento?: string
           updated_at?: string
           updated_by?: string
+        }
+        Relationships: []
+      }
+      colaboradores_retirados: {
+        Row: {
+          cedula: number
+          created_at: string
+          fecha_reporte: string
+          nombre: string
+          nombre_normalizado: string | null
+          observacion: string | null
+          valor: number | null
+        }
+        Insert: {
+          cedula: number
+          created_at?: string
+          fecha_reporte?: string
+          nombre: string
+          observacion?: string | null
+          valor?: number | null
+        }
+        Update: {
+          cedula?: number
+          created_at?: string
+          fecha_reporte?: string
+          nombre?: string
+          observacion?: string | null
+          valor?: number | null
+        }
+        Relationships: []
+      }
+      colaboradores_retirados_imports: {
+        Row: {
+          errors: number
+          file_name: string
+          file_size: number
+          id: string
+          imported_at: string
+          imported_by: string | null
+          total_rows: number
+          upserted: number
+        }
+        Insert: {
+          errors?: number
+          file_name: string
+          file_size: number
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          total_rows: number
+          upserted?: number
+        }
+        Update: {
+          errors?: number
+          file_name?: string
+          file_size?: number
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          total_rows?: number
+          upserted?: number
         }
         Relationships: []
       }
