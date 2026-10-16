@@ -20,7 +20,9 @@ export function AppShell({ user, roles, children }: AppShellProps) {
     <TooltipProvider delayDuration={150}>
       <SidebarProvider style={sidebarStyle}>
         <AppSidebar user={user} roles={roles} />
-        <SidebarInset>
+        {/* min-w-0: una tabla ancha hace scroll dentro de su contenedor en vez de
+            ensanchar toda la página. */}
+        <SidebarInset className="min-w-0">
           <Topbar user={user} roles={roles} />
           <div className="flex flex-1 flex-col">
             <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
