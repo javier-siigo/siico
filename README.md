@@ -8,7 +8,7 @@ automatizaciones expuestas vía **n8n**, con autenticación gestionada por
 > navegables con placeholders. Las colecciones y modelos de datos se definirán
 > en fases posteriores.
 
----
+----
 
 ## Stack
 
