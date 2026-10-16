@@ -121,6 +121,203 @@ export type Database = {
         }
         Relationships: []
       }
+      comisiones_bases: {
+        Row: {
+          facturas: number
+          notas_credito: number
+          periodo: string
+          prefijo: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          facturas?: number
+          notas_credito?: number
+          periodo: string
+          prefijo: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          facturas?: number
+          notas_credito?: number
+          periodo?: string
+          prefijo?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      comisiones_cierres: {
+        Row: {
+          archivo_nombre: string
+          archivo_tamano: number
+          asientos: Json
+          controles: Json
+          created_at: string
+          created_by: string | null
+          diferido_nuevo: number
+          gasto_mes: number
+          id: string
+          periodo: string
+          saldo_diferido: number
+        }
+        Insert: {
+          archivo_nombre: string
+          archivo_tamano: number
+          asientos?: Json
+          controles?: Json
+          created_at?: string
+          created_by?: string | null
+          diferido_nuevo: number
+          gasto_mes: number
+          id?: string
+          periodo: string
+          saldo_diferido: number
+        }
+        Update: {
+          archivo_nombre?: string
+          archivo_tamano?: number
+          asientos?: Json
+          controles?: Json
+          created_at?: string
+          created_by?: string | null
+          diferido_nuevo?: number
+          gasto_mes?: number
+          id?: string
+          periodo?: string
+          saldo_diferido?: number
+        }
+        Relationships: []
+      }
+      comisiones_conceptos: {
+        Row: {
+          activo: boolean
+          created_at: string
+          created_by: string | null
+          cuenta: string | null
+          id: string
+          nombre: string
+          orden: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          created_by?: string | null
+          cuenta?: string | null
+          id?: string
+          nombre: string
+          orden?: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          created_by?: string | null
+          cuenta?: string | null
+          id?: string
+          nombre?: string
+          orden?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      comisiones_periodo_valores: {
+        Row: {
+          concepto_id: string
+          periodo: string
+          updated_at: string
+          updated_by: string | null
+          valor: number
+        }
+        Insert: {
+          concepto_id: string
+          periodo: string
+          updated_at?: string
+          updated_by?: string | null
+          valor?: number
+        }
+        Update: {
+          concepto_id?: string
+          periodo?: string
+          updated_at?: string
+          updated_by?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comisiones_periodo_valores_concepto_id_fkey"
+            columns: ["concepto_id"]
+            isOneToOne: false
+            referencedRelation: "comisiones_conceptos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comisiones_gasto_registrado: {
+        Row: {
+          cohorte: string
+          concepto_id: string
+          gasto: number
+          motivo: string
+          periodo: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cohorte: string
+          concepto_id: string
+          gasto: number
+          motivo: string
+          periodo: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cohorte?: string
+          concepto_id?: string
+          gasto?: number
+          motivo?: string
+          periodo?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      comisiones_reconocimientos: {
+        Row: {
+          cohorte: string
+          fuente: string
+          ingreso: number
+          pendiente_ingreso: number | null
+          periodo: string
+          prefijo: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cohorte: string
+          fuente?: string
+          ingreso: number
+          pendiente_ingreso?: number | null
+          periodo: string
+          prefijo: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cohorte?: string
+          fuente?: string
+          ingreso?: number
+          pendiente_ingreso?: number | null
+          periodo?: string
+          prefijo?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       conciliacion_bancos: {
         Row: {
           activo: boolean
@@ -189,6 +386,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      comisiones_guardar_cierre: {
+        Args: { p_cierre: Json; p_periodo: string; p_reconocimientos: Json }
+        Returns: undefined
+      }
       current_user_has_role: { Args: { check_role: string }; Returns: boolean }
       match_colaborador_retirado: {
         Args: { p_input: string }
