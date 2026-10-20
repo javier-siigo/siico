@@ -41,7 +41,9 @@ export interface InputFile {
   originalName: string;
 }
 
-const REQUEST_TIMEOUT_MS = 60_000;
+// Algunos bancos tardan varios minutos en n8n. Queda por debajo del
+// maxDuration (300 s) de la ruta para devolver un error claro en vez del 504 de Vercel.
+const REQUEST_TIMEOUT_MS = 280_000;
 const FALLBACK_FILENAME = "resultado_conciliacion.xlsx";
 const FALLBACK_CONTENT_TYPE =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

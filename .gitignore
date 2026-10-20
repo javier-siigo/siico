@@ -23,7 +23,6 @@ build
 
 # misc
 .DS_Store
-*.pem
 .idea
 .vscode
 *.swp
@@ -36,9 +35,11 @@ yarn-error.log*
 *.log
 
 # env
+# Cualquier variante con nombre (.env.production, .env.staging, .env.development…)
+# se ignora; solo .env.example queda versionado como plantilla.
 .env
-.env.local
-.env*.local
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
@@ -64,6 +65,15 @@ next-env.d.ts
 /.gemini/
 /.agent/
 /.agents/
+/.claude/
+/.mcp.json
+
+# Certificados / claves privadas (por si alguien las deja en la raíz)
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
 
 # Artefactos locales generados por npx (npx <pkg>@latest crea una carpeta literal)
 /playwright@latest/

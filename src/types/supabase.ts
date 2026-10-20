@@ -360,6 +360,78 @@ export type Database = {
         }
         Relationships: []
       }
+      export_bancos_plantillas: {
+        Row: {
+          campos: string[]
+          created_at: string
+          created_by: string | null
+          id: string
+          nombre: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          campos?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nombre: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          campos?: string[]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nombre?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      netsuite_campos: {
+        Row: {
+          campo: string
+          created_at: string
+          created_by: string | null
+          etiqueta: string
+          habilitado: boolean
+          id: string
+          modo: string
+          orden: number
+          tabla: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          campo: string
+          created_at?: string
+          created_by?: string | null
+          etiqueta: string
+          habilitado?: boolean
+          id?: string
+          modo?: string
+          orden?: number
+          tabla: string
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          campo?: string
+          created_at?: string
+          created_by?: string | null
+          etiqueta?: string
+          habilitado?: boolean
+          id?: string
+          modo?: string
+          orden?: number
+          tabla?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           paises: string[]

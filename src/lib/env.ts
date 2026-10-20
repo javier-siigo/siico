@@ -1,3 +1,5 @@
+import "server-only";
+
 import { z } from "zod";
 
 const serverSchema = z.object({
@@ -17,28 +19,21 @@ const serverSchema = z.object({
     .min(1, "Falta la service role key de Supabase")
     .optional()
     .or(z.literal("")),
+  // NetSuite (OAuth 2.0 M2M). Opcionales aquí para no romper el resto del
+  // portal; `netsuiteConfig()` exige que estén completas al usarlas.
+  NETSUITE_ACCOUNT_ID: z.string().optional().or(z.literal("")),
+  NETSUITE_CONSUMER_KEY: z.string().optional().or(z.literal("")),
+  NETSUITE_CERT_ID: z.string().optional().or(z.literal("")),
+  NETSUITE_PRIVATE_KEY: z.string().optional().or(z.literal("")),
+  EXPORTS_BUCKET: z
+    .string()
+    .optional()
+    .transform((v) => v || "exports"),
 });
 
-const publicSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z
-    .string()
-    .url("NEXT_PUBLIC_SUPABASE_URL debe ser una URL válida"),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z
-    .string()
-    .min(1, "Falta la anon key de Supabase"),
-});
-
-type PublicEnv = z.infer<typeof publicSchema>;
-type ServerEnv = z.infer<typeof serverSchema>;
+export type ServerEnv = z.infer<typeof serverSchema>;
 
 let cachedServer: ServerEnv | null = null;
-
-export function publicEnv(): PublicEnv {
-  return publicSchema.parse({
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  });
-}
 
 export function serverEnv(): ServerEnv {
   if (cachedServer) return cachedServer;
@@ -47,6 +42,11 @@ export function serverEnv(): ServerEnv {
     N8N_WEBHOOK_SECRET: process.env.N8N_WEBHOOK_SECRET,
     N8N_NOTAS_CREDITO_PATH: process.env.N8N_NOTAS_CREDITO_PATH,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    NETSUITE_ACCOUNT_ID: process.env.NETSUITE_ACCOUNT_ID,
+    NETSUITE_CONSUMER_KEY: process.env.NETSUITE_CONSUMER_KEY,
+    NETSUITE_CERT_ID: process.env.NETSUITE_CERT_ID,
+    NETSUITE_PRIVATE_KEY: process.env.NETSUITE_PRIVATE_KEY,
+    EXPORTS_BUCKET: process.env.EXPORTS_BUCKET,
   });
   if (!parsed.success) {
     const messages = parsed.error.issues

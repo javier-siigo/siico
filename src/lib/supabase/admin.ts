@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { publicEnv, serverEnv } from "@/lib/env";
+import { serverEnv } from "@/lib/env";
+import { publicEnv } from "@/lib/env-public";
 import type { Database } from "@/types/supabase";
 
 let cachedAdmin: ReturnType<typeof createClient<Database>> | null = null;

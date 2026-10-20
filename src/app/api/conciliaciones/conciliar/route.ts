@@ -13,7 +13,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 export const runtime = "nodejs";
-export const maxDuration = 90;
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         err.code === "upstream_status" && err.status >= 500
           ? "El servicio de conciliación no está disponible. Intenta de nuevo."
           : err.code === "upstream_timeout"
-            ? "La conciliación tardó demasiado. Intenta con un archivo más pequeño."
+            ? "La conciliación tardó más de 5 minutos. Revisa el flujo en n8n o intenta con un archivo más pequeño."
             : err.code === "upstream_empty"
               ? "El servicio devolvió un archivo vacío."
               : err.message;

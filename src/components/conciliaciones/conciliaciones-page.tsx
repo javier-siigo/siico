@@ -43,7 +43,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   storage_unauthorized: "No tienes acceso a este archivo.",
   storage_not_found: "El archivo subido ya no está disponible. Súbelo de nuevo.",
   upstream_config: "Falta configurar la URL del flujo de conciliación.",
-  upstream_timeout: "La conciliación tardó demasiado.",
+  upstream_timeout: "La conciliación tardó más de 5 minutos.",
   upstream_network: "No se pudo contactar el servicio de conciliación.",
   upstream_status: "El servicio de conciliación devolvió un error.",
   upstream_empty: "El servicio devolvió un archivo vacío.",
@@ -244,7 +244,11 @@ export function ConciliacionesPageClient({
           const payload = (await conciliarRes.json().catch(() => null)) as
             | { error?: string; code?: string }
             | null;
-          const code = asErrorCode(payload?.code);
+          // Sin JSON y con 504 es Vercel cortando la función por tiempo.
+          const code =
+            !payload && conciliarRes.status === 504
+              ? "upstream_timeout"
+              : asErrorCode(payload?.code);
           const message = payload?.error ?? ERROR_MESSAGES[code] ?? "Error al conciliar";
           fail(message);
           return;

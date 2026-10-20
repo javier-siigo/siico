@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Calculator,
   HandCoins,
+  Landmark,
   Receipt,
   Scale,
   Settings,
@@ -93,6 +94,13 @@ export const AREAS: Area[] = [
         description:
           "Procesamiento y control mensual del reconocimiento de comisiones.",
         icon: Calculator,
+      },
+      {
+        slug: "export-bancos",
+        label: "Movimientos bancarios NetSuite",
+        description:
+          "Exporta a Excel las líneas contables de cuentas bancarias de un rango de fechas.",
+        icon: Landmark,
       },
     ],
   },

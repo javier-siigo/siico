@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { getUserRoles, hasIngresosOrAdmin } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import {
   MAX_ANTICIPOS_ROWS,
@@ -43,8 +44,34 @@ function buildRetiroInfo(
   };
 }
 
-export async function getAnticiposAll(): Promise<AnticipoRow[]> {
+const SESION_EXPIRADA = "Tu sesión expiró. Vuelve a iniciar sesión.";
+const SIN_PERMISOS = "No tienes permisos para gestionar anticipos.";
+
+/**
+ * Las server actions son un endpoint público: la autorización de la página
+ * (`requireProcesoAccess`) no las cubre. Cada acción debe validar sesión y rol
+ * aquí, y las políticas de RLS de `anticipos_registros` lo respaldan.
+ */
+async function requireIngresos() {
   const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (error || !user) {
+    return { supabase, userId: null, error: SESION_EXPIRADA } as const;
+  }
+  const roles = await getUserRoles(user.id);
+  if (!hasIngresosOrAdmin(roles)) {
+    return { supabase, userId: null, error: SIN_PERMISOS } as const;
+  }
+  return { supabase, userId: user.id, error: null } as const;
+}
+
+export async function getAnticiposAll(): Promise<AnticipoRow[]> {
+  const guard = await requireIngresos();
+  if (guard.error) return [];
+  const supabase = guard.supabase;
 
   const { data, error } = await supabase
     .from("anticipos_registros")
@@ -132,14 +159,10 @@ export async function createAnticipo(
     return { error: "Revisa los campos marcados", fieldErrors };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-  }
+  const guard = await requireIngresos();
+  if (guard.error) return { error: guard.error };
+  const supabase = guard.supabase;
+  const userId = guard.userId!;
 
   const payload: AnticipoCreateInput = parsed.data;
 
@@ -152,8 +175,8 @@ export async function createAnticipo(
     fecha_rq: payload.fecha_rq,
     fecha_gestion:
       payload.fecha_gestion === "" ? null : payload.fecha_gestion,
-    created_by: user.id,
-    updated_by: user.id,
+    created_by: userId,
+    updated_by: userId,
   });
 
   if (error) {
@@ -208,14 +231,10 @@ export async function updateAnticipo(
     return { error: "Revisa los campos marcados", fieldErrors };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-  }
+  const guard = await requireIngresos();
+  if (guard.error) return { error: guard.error };
+  const supabase = guard.supabase;
+  const userId = guard.userId!;
 
   const payload: AnticipoUpdateInput = parsed.data;
 
@@ -230,7 +249,7 @@ export async function updateAnticipo(
       fecha_rq: payload.fecha_rq,
       fecha_gestion:
         payload.fecha_gestion === "" ? null : payload.fecha_gestion,
-      updated_by: user.id,
+      updated_by: userId,
     })
     .eq("id", payload.id);
 
@@ -266,14 +285,9 @@ export async function deleteAnticipo(
     return { error: "Identificador inválido." };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-  }
+  const guard = await requireIngresos();
+  if (guard.error) return { error: guard.error };
+  const supabase = guard.supabase;
 
   const { error } = await supabase
     .from("anticipos_registros")
@@ -301,21 +315,17 @@ export async function legalizeAnticipo(
     return { error: "Identificador inválido." };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-  }
+  const guard = await requireIngresos();
+  if (guard.error) return { error: guard.error };
+  const supabase = guard.supabase;
+  const userId = guard.userId!;
 
   const { error } = await supabase
     .from("anticipos_registros")
     .update({
       falta: "legalizado",
       observacion_1: "legalizado",
-      updated_by: user.id,
+      updated_by: userId,
     })
     .eq("id", parsed.data.id);
 

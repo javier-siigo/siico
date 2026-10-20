@@ -78,6 +78,11 @@ Variables:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | pública | Anon / publishable key del proyecto. Se envía al navegador. |
 | `N8N_BASE_URL` | servidor | URL base del servidor n8n. |
 | `N8N_WEBHOOK_SECRET` | servidor | Secreto compartido con n8n para autenticar webhooks. |
+| `NETSUITE_ACCOUNT_ID` | servidor | ID de la cuenta NetSuite (`6389340`). |
+| `NETSUITE_CONSUMER_KEY` | servidor | Consumer key de la integración OAuth 2.0 (M2M). |
+| `NETSUITE_CERT_ID` | servidor | ID del certificado cargado en NetSuite (`kid` del JWT). |
+| `NETSUITE_PRIVATE_KEY` | servidor | Clave privada PEM PKCS#8; puede ir en una sola línea. |
+| `EXPORTS_BUCKET` | servidor | Bucket privado de Storage para los Excel generados (default `exports`). |
 
 ### 3. Configurar Supabase
 

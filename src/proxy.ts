@@ -4,6 +4,22 @@ import { createServerClient } from "@supabase/ssr";
 const PUBLIC_PATHS = new Set<string>(["/login"]);
 const PUBLIC_PREFIXES = ["/api/public", "/_next", "/favicon", "/icons"];
 
+/**
+ * Solo permite redirecciones internas. `from` viene del query string, así que
+ * sin esta validación `?from=https://evil.com` o `?from=//evil.com` convertirían
+ * /login en un open redirect phishing con la URL del portal como cobertura.
+ */
+function safeInternalPath(value: string | null): string {
+  if (!value) return "/dashboard";
+  // `new URL()` elimina tabuladores y saltos de línea antes de resolver, así que
+  // "/\t/evil.com" se convertiría en "//evil.com" si no los quitamos antes.
+  const path = value.replace(/[\t\n\r]/g, "");
+  if (!path.startsWith("/")) return "/dashboard";
+  if (path.startsWith("//")) return "/dashboard";
+  if (path.startsWith("/\\")) return "/dashboard";
+  return path;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -44,7 +60,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (hasSession && pathname === "/login") {
-    const next = request.nextUrl.searchParams.get("from") ?? "/dashboard";
+    const next = safeInternalPath(
+      request.nextUrl.searchParams.get("from"),
+    );
     return NextResponse.redirect(new URL(next, request.url));
   }
 
