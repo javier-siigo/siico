@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Download, FileSpreadsheet, Loader2, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { ComoUsar } from "@/components/tour/como-usar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import {
 } from "@/lib/netsuite/rango-fechas";
 
 import { CamposCard, mismosIds } from "./campos-card";
+import { TOUR_EXPORT_BANCOS } from "./tour";
 
 type ExportState =
   | { status: "idle" }
@@ -221,14 +223,17 @@ export function ExportBancosPageClient({
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-base font-semibold tracking-tight text-foreground">
-          Movimientos bancarios NetSuite
-        </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Exporta a un solo Excel las líneas contables de cuentas bancarias (sin asientos de diario)
-          de un periodo de hasta {MAX_DIAS_EXPORT} días.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="flex min-w-0 flex-col gap-2">
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Movimientos bancarios NetSuite
+          </h1>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Exporta a un solo Excel las líneas contables de cuentas bancarias (sin asientos de
+            diario) de un periodo de hasta {MAX_DIAS_EXPORT} días.
+          </p>
+        </div>
+        <ComoUsar steps={TOUR_EXPORT_BANCOS} />
       </header>
 
       <section
@@ -246,6 +251,7 @@ export function ExportBancosPageClient({
           <div
             role="group"
             aria-label="Meses recientes"
+            data-tour="meses"
             className="grid grid-cols-3 gap-1.5 sm:grid-cols-6 lg:grid-cols-3 xl:grid-cols-6"
           >
             {meses.map((m) => {
@@ -282,7 +288,7 @@ export function ExportBancosPageClient({
             })}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3" data-tour="fechas">
             <div className="flex min-w-0 flex-col gap-1.5">
               <Label htmlFor="fecha-inicio">Desde</Label>
               <Input
@@ -316,7 +322,7 @@ export function ExportBancosPageClient({
 
         <div className="flex min-w-0 flex-col gap-4 border-t border-border p-5 lg:border-l lg:border-t-0">
           <h2 className="text-base font-semibold tracking-tight text-foreground">Exportación</h2>
-          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
+          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm" data-tour="resumen">
             <dt className="text-muted-foreground">Rango</dt>
             <dd className="min-w-0 text-right text-foreground">
               {rangoError ? (
@@ -348,12 +354,13 @@ export function ExportBancosPageClient({
           )}
 
           {busy ? (
-            <Button variant="outline" className="mt-auto w-full" onClick={cancelar}>
+            <Button variant="outline" className="mt-auto w-full" onClick={cancelar} data-tour="generar">
               <X aria-hidden />
               Cancelar
             </Button>
           ) : (
             <Button
+              data-tour="generar"
               className="mt-auto w-full"
               // Con un Excel listo, la acción principal pasa a ser Descargar.
               variant={listo ? "outline" : "default"}
@@ -408,6 +415,7 @@ function EstadoExportacion({
   return (
     <div
       aria-live="polite"
+      data-tour="estado"
       className="flex min-h-16 flex-col gap-3 border-t border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between lg:col-span-2"
     >
       {state.status === "idle" && (

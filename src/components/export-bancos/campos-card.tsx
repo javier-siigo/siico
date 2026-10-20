@@ -116,6 +116,8 @@ export function CamposCard({
       )
     : habilitados;
 
+  const primerGrupo = TABLAS.find((t) => visibles.some((c) => c.tabla === t));
+
   const elegirPlantilla = (id: string) => {
     if (id === SIN_PLANTILLA) {
       onPlantillaChange(null);
@@ -222,7 +224,11 @@ export function CamposCard({
             />
           </div>
           {esAdmin && (
-            <Button variant="outline" onClick={() => setCatalogoOpen(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setCatalogoOpen(true)}
+              data-tour="catalogo"
+            >
               <Settings2 className="size-4" aria-hidden />
               Administrar catálogo
             </Button>
@@ -230,7 +236,7 @@ export function CamposCard({
         </div>
       </header>
 
-      <div className="flex flex-wrap items-end gap-2">
+      <div className="flex flex-wrap items-end gap-2" data-tour="plantilla">
         <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
           <Label htmlFor="plantilla">Plantilla</Label>
           <Select
@@ -329,7 +335,13 @@ export function CamposCard({
             const estado =
               marcados === 0 ? false : marcados === grupo.length ? true : "indeterminate";
             return (
-              <fieldset key={tabla} className="flex flex-col gap-2" disabled={disabled}>
+              <fieldset
+                key={tabla}
+                className="flex flex-col gap-2"
+                disabled={disabled}
+                // El recorrido resalta el primer grupo visible: la lista completa no cabe.
+                data-tour={tabla === primerGrupo ? "campos" : undefined}
+              >
                 <legend className="flex w-full items-center gap-2 border-b border-border pb-1.5">
                   <Checkbox
                     checked={estado}

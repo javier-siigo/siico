@@ -1,6 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  BookOpen,
   Calculator,
+  FileText,
   HandCoins,
   Landmark,
   Receipt,
@@ -9,12 +11,16 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+import { DOCUMENTOS } from "@/lib/documentacion/registry";
+
 export type Proceso = {
   slug: string;
   label: string;
   description: string;
   icon: LucideIcon;
   flagCode?: string;
+  /** Roles que dan acceso (además de admin); vacío = cualquier usuario autenticado. Solo Documentación. */
+  roles?: readonly string[];
 };
 
 export type Area = {
@@ -23,6 +29,8 @@ export type Area = {
   description: string;
   icon: LucideIcon;
   procesos: Proceso[];
+  /** Se abre desde el menú de usuario, no desde la barra lateral. */
+  enMenuUsuario?: boolean;
 };
 
 export const AREAS: Area[] = [
@@ -105,10 +113,25 @@ export const AREAS: Area[] = [
     ],
   },
   {
+    slug: "documentacion",
+    label: "Documentación",
+    description: "Cómo funciona cada proceso del portal.",
+    icon: BookOpen,
+    enMenuUsuario: true,
+    procesos: DOCUMENTOS.map((d) => ({
+      slug: d.slug,
+      label: d.titulo,
+      description: d.descripcion,
+      icon: FileText,
+      roles: d.roles,
+    })),
+  },
+  {
     slug: "admin",
     label: "Administración",
     description: "Configuración interna del portal.",
     icon: Settings,
+    enMenuUsuario: true,
     procesos: [
       {
         slug: "usuarios",

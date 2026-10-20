@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 import { BankCombobox } from "./bank-combobox";
 import { DualUploadCard } from "./dual-upload-card";
+import { tourConciliaciones } from "./tour";
+import { ComoUsar } from "@/components/tour/como-usar";
 import { Button } from "@/components/ui/button";
 import type {
   BancoConciliacion,
@@ -335,21 +337,27 @@ export function ConciliacionesPageClient({
       ? idleFileStatus
       : (currentRun?.status ?? idleFileStatus);
 
+  const tour = React.useMemo(() => tourConciliaciones(PAIS_LABEL[pais]), [pais]);
+
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-base font-semibold tracking-tight text-foreground">
-          Conciliación {PAIS_LABEL[pais]}
-        </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Conciliación contable para operaciones en {PAIS_LABEL[pais]}. Selecciona el
-          banco, carga el extracto bancario del período y, si cuentas con uno,
-          el reporte previo.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="flex min-w-0 flex-col gap-2">
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Conciliación {PAIS_LABEL[pais]}
+          </h1>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Conciliación contable para operaciones en {PAIS_LABEL[pais]}. Selecciona el
+            banco, carga el extracto bancario del período y, si cuentas con uno,
+            el reporte previo.
+          </p>
+        </div>
+        <ComoUsar steps={tour} />
       </header>
 
       <section
         aria-labelledby="banco-title"
+        data-tour="banco"
         className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 shadow-sm"
       >
         <header className="flex flex-col gap-1.5">
@@ -391,7 +399,7 @@ export function ConciliacionesPageClient({
         disabled={isBusy}
       />
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-2" data-tour="procesar">
         <Button
           type="button"
           onClick={handleSubmit}

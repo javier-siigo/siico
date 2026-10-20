@@ -67,7 +67,7 @@ export function hasIngresosOrAdmin(info: UserRolesInfo): boolean {
 export async function requireProcesoAccess(
   info: UserRolesInfo,
   areaSlug: string,
-  proceso: Pick<Proceso, "slug" | "flagCode">,
+  proceso: Pick<Proceso, "slug" | "flagCode" | "roles">,
 ): Promise<void> {
   if (!canAccessProceso(info, areaSlug, proceso)) notFound();
 }

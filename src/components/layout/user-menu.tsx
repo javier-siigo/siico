@@ -1,8 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { BookOpen, LogOut, Users } from "lucide-react";
 
 import { logoutAction } from "@/lib/auth/actions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -19,9 +20,11 @@ import {
 interface UserMenuProps {
   name: string;
   email: string;
+  /** Muestra "Usuarios y roles" (solo admin). */
+  esAdmin: boolean;
 }
 
-export function UserMenu({ name, email }: UserMenuProps) {
+export function UserMenu({ name, email, esAdmin }: UserMenuProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -58,8 +61,22 @@ export function UserMenu({ name, email }: UserMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Sesión</DropdownMenuLabel>
+        <DropdownMenuItem asChild>
+          <Link href="/documentacion" className="flex w-full cursor-pointer items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Documentación
+          </Link>
+        </DropdownMenuItem>
+        {esAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/admin/usuarios" className="flex w-full cursor-pointer items-center gap-2">
+              <Users className="h-4 w-4" />
+              Usuarios y roles
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
+        <DropdownMenuLabel>Sesión</DropdownMenuLabel>
         <DropdownMenuItem asChild>
           <button
             type="button"

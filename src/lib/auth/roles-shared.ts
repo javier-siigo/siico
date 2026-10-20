@@ -35,6 +35,7 @@ export function canAccessArea(
   areaSlug: string,
 ): boolean {
   if (isAdmin(info)) return true;
+  if (areaSlug === "documentacion") return true;
   if (areaSlug === "conciliaciones") return hasRole(info, ROLE_CONCILIACIONES);
   if (areaSlug === "ingresos") return hasRole(info, ROLE_INGRESOS);
   if (areaSlug === "admin") return false;
@@ -44,9 +45,13 @@ export function canAccessArea(
 export function canAccessProceso(
   info: UserRolesInfo,
   areaSlug: string,
-  proceso: Pick<Proceso, "slug" | "flagCode">,
+  proceso: Pick<Proceso, "slug" | "flagCode" | "roles">,
 ): boolean {
   if (isAdmin(info)) return true;
+  if (areaSlug === "documentacion") {
+    const roles = proceso.roles ?? [];
+    return roles.length === 0 || roles.some((r) => hasRole(info, r));
+  }
   if (areaSlug === "conciliaciones" && proceso.flagCode) {
     return (
       hasRole(info, ROLE_CONCILIACIONES) &&

@@ -29,7 +29,7 @@ export function PeriodoPicker({ value, onChange, max, guardados }: PeriodoPicker
   const min = opciones[opciones.length - 1]!;
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" data-tour="periodo">
       <Button
         variant="outline"
         size="icon"

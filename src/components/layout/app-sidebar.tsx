@@ -66,7 +66,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ user, roles }: AppSidebarProps) {
-  const visibleAreas = filterAreas(roles, AREAS);
+  const visibleAreas = filterAreas(roles, AREAS).filter((a) => !a.enMenuUsuario);
   const pathname = usePathname();
   const [openAreas, setOpenAreas] = useState<Record<string, boolean>>({});
   const [hydrated, setHydrated] = useState(false);

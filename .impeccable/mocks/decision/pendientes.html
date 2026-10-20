@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}body{width:1440px;height:900px;overflow:hidden;font-family:"IBM Plex Sans",sans-serif;background:#F2F5F9;color:#1E252E;display:flex;font-size:14px}
+.side{width:256px;background:#0B89D6;color:#fff;padding:14px 10px;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 6px 14px}.mark{width:32px;height:32px;background:#fff;border-radius:6px}
+.brand b{font-size:14px;display:block}.brand span{font-size:11px;opacity:.75}
+.nav{padding:8px 10px;border-radius:6px}.nav.on{background:#0A6FB4;font-weight:600}.lab{font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.06em;padding:12px 10px 4px}
+.main{flex:1;display:flex;flex-direction:column}
+.top{height:56px;background:#fff;border-bottom:1px solid #DCE2EA;display:flex;align-items:center;padding:0 32px;gap:10px}
+.top .eb{font-size:11px;letter-spacing:.08em;color:#6A7482}.top b{font-size:14px}.top .u{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:13px}.av{width:28px;height:28px;border-radius:50%;background:#E6EBF1;display:grid;place-items:center;font-size:11px}
+.well{padding:32px;display:flex;flex-direction:column;gap:22px;max-width:1184px}
+h1{font-size:18px;font-weight:600}.sub{color:#6A7482;margin-top:4px}
+.box{background:#fff;border:1px solid #DCE2EA;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.boxh{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #DCE2EA}
+.boxh b{font-size:15px}.boxh .c{font-family:"IBM Plex Mono";font-size:12px;background:#F2F5F9;border-radius:5px;padding:1px 7px;color:#6A7482}
+.it{display:flex;align-items:center;gap:14px;padding:14px 20px;border-top:1px solid #EEF1F5}.it:first-of-type{border-top:0}
+.bar{width:3px;align-self:stretch;border-radius:3px}
+.it .tx{flex:1;display:flex;flex-direction:column;gap:2px}.it .tt{font-weight:600}.it .ds{font-size:13px;color:#6A7482}
+.num{font-family:"IBM Plex Mono";font-weight:600;font-size:18px;min-width:44px;text-align:right}
+.btn{font-size:13px;font-weight:500;padding:6px 12px;border-radius:6px;border:1px solid #DCE2EA;background:#fff;white-space:nowrap}.btn.p{background:#0088DA;color:#fff;border-color:#0088DA}
+.seg{display:flex;gap:3px}.seg i{height:6px;width:28px;border-radius:9px;background:#E3E8EF}.seg i.a{background:#F5B700}
+.grp{display:flex;flex-direction:column;gap:10px}.gl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6A7482;display:flex;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tile{background:#fff;border:1px solid #DCE2EA;border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.tile .n{font-size:13px;font-weight:600}.tile .v{font-family:"IBM Plex Mono";font-size:20px;font-weight:600}.tile .v small{font-family:"IBM Plex Sans";font-size:12px;font-weight:400;color:#6A7482;margin-left:4px}.tile .m{font-size:12px;color:#6A7482}
+.ic{width:28px;height:28px;border-radius:6px;background:rgba(0,136,218,.1);border:1px solid rgba(0,136,218,.15)}
+.flag{width:18px;height:12px;border-radius:2px;display:inline-block}
+.co{background:linear-gradient(#FCD116 50%,#003893 50% 75%,#CE1126 75%)}.ec{background:linear-gradient(#FFD100 50%,#034EA2 50% 75%,#ED1C24 75%)}.uy{background:repeating-linear-gradient(#fff 0 1.3px,#0038A8 1.3px 2.6px)}.cl{background:linear-gradient(#fff 50%,#D52B1E 50%)}.mx{background:linear-gradient(90deg,#006847 33%,#fff 33% 66%,#CE1126 66%)}
+.tile.off{background:transparent;box-shadow:none;border-style:dashed}.tile.off .n,.tile.off .m{color:#8A93A0}
+</style></head><body>
+<aside class="side">
+ <div class="brand"><div class="mark"></div><div><b>SIICO</b><span>Portal contable</span></div></div>
+ <div class="nav on">Inicio</div><div class="lab">Áreas</div><div class="nav">Conciliaciones</div><div class="nav">Ingresos</div>
+</aside>
+<div class="main">
+ <div class="top"><span class="eb">CATÁLOGO</span><b>Inicio</b><div class="u"><div class="av">A</div>admin</div></div>
+ <div class="well">
+  <div><h1>Buenos días</h1><p class="sub">Lunes 20 de octubre · 3 cosas necesitan tu atención</p></div>
+  <section class="box">
+   <div class="boxh"><b>Necesita atención</b><span class="c">3</span></div>
+   <div class="it"><span class="bar" style="background:#D93D2E"></span><span class="num" style="color:#B42318">20</span>
+    <div class="tx"><span class="tt">Anticipos sin gestión hace más de 10 días</span><span class="ds">Gestión de anticipos · de 37 pendientes</span></div><span class="btn p">Ver atrasados</span></div>
+   <div class="it"><span class="bar" style="background:#F5B700"></span><span class="num"><span class="seg"><i class="a"></i><i></i><i></i><i></i></span></span>
+    <div class="tx"><span class="tt">Cierre de comisiones de septiembre en el paso 1 de 4</span><span class="ds">Siguiente: registra las comisiones causadas del mes</span></div><span class="btn">Continuar</span></div>
+   <div class="it"><span class="bar" style="background:#0088DA"></span><span class="num" style="font-size:14px;color:#0088DA">SEP</span>
+    <div class="tx"><span class="tt">Movimientos bancarios de septiembre listos para exportar</span><span class="ds">Un mes completo suele tardar alrededor de un minuto</span></div><span class="btn">Exportar</span></div>
+  </section>
+  <div class="grp"><span class="gl">Ingresos</span>
+   <div class="grid">
+    <div class="tile"><div class="ic"></div><span class="n">Gestión de anticipos</span><span class="v">37<small>pendientes</small></span><span class="m">2 legalizados · 5% del total</span></div>
+    <div class="tile"><div class="ic"></div><span class="n">Cálculo de comisiones</span><span class="v" style="font-size:15px">Sep · paso 1/4</span><span class="m">Sin cierres guardados</span></div>
+    <div class="tile"><div class="ic"></div><span class="n">Notas crédito</span><span class="v" style="font-size:15px">Bajo demanda</span><span class="m">Sube el INFORME y procesa</span></div>
+    <div class="tile"><div class="ic"></div><span class="n">Movimientos bancarios</span><span class="v" style="font-size:15px">Sep 2026</span><span class="m">Último mes completo</span></div>
+   </div>
+  </div>
+  <div class="grp"><span class="gl">Conciliaciones</span>
+   <div class="grid" style="grid-template-columns:repeat(5,1fr)">
+    <div class="tile"><span class="flag co"></span><span class="n">Colombia</span><span class="m">6 bancos configurados</span></div>
+    <div class="tile"><span class="flag ec"></span><span class="n">Ecuador</span><span class="m">3 bancos configurados</span></div>
+    <div class="tile"><span class="flag uy"></span><span class="n">Uruguay</span><span class="m">5 bancos configurados</span></div>
+    <div class="tile off"><span class="flag cl"></span><span class="n">Chile</span><span class="m">Próximamente</span></div>
+    <div class="tile off"><span class="flag mx"></span><span class="n">México</span><span class="m">Próximamente</span></div>
+   </div>
+  </div>
+ </div>
+</div>
+</body></html>

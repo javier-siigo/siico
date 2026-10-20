@@ -40,6 +40,7 @@ export function SiguienteBand({
       <div
         role="status"
         aria-live="polite"
+        data-tour="siguiente"
         className="flex flex-col gap-3 rounded-lg bg-[#1F2733] px-5 py-3.5 text-white shadow-md ring-1 ring-white/10 sm:flex-row sm:items-center sm:gap-5"
       >
         <span

@@ -54,6 +54,7 @@ export function DualUploadCard({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <SlotShell
           title="Extracto bancario"
+          tour="extracto"
           required
           subtitle="Obligatorio"
           icon={<Banknote className="size-4" aria-hidden />}
@@ -70,6 +71,7 @@ export function DualUploadCard({
         </SlotShell>
         <SlotShell
           title="Reporte previo"
+          tour="previo"
           subtitle="Opcional"
           icon={<FilePlus2 className="size-4" aria-hidden />}
         >
@@ -93,16 +95,19 @@ function SlotShell({
   subtitle,
   required,
   icon,
+  tour,
   children,
 }: {
   title: string;
+  /** Marca para el recorrido "¿Cómo usar?". */
+  tour?: string;
   subtitle: string;
   required?: boolean;
   icon: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-3">
+    <div className="flex min-w-0 flex-col gap-3" data-tour={tour}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="flex size-5 items-center justify-center text-muted-foreground">

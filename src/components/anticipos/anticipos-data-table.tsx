@@ -444,8 +444,8 @@ export function AnticiposDataTable({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative">
+      <div className="flex flex-wrap items-center gap-3" data-tour="filtros">
+        <div className="relative" data-tour="buscar">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
@@ -564,7 +564,7 @@ export function AnticiposDataTable({
       </div>
 
       {visibleRows.length ? (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden" data-tour="tabla">
           <CardContent className="p-0">
             <Table ref={tableRef} className="table-fixed">
               <TableHeader className="bg-muted/40">
@@ -626,7 +626,7 @@ export function AnticiposDataTable({
                 ))}
               </TableHeader>
               <TableBody>
-                {visibleRows.map((row) => {
+                {visibleRows.map((row, index) => {
                   const id = row.id;
                   const justAdded = highlightedRowIds?.added?.has(id) ?? false;
                   const justLegalized =
@@ -638,6 +638,8 @@ export function AnticiposDataTable({
                       className={cn("group", isRetirado && "bg-muted/30")}
                       data-just-added={justAdded ? "true" : undefined}
                       data-just-legalized={justLegalized ? "true" : undefined}
+                      // El recorrido "¿Cómo usar?" explica las acciones con la primera fila.
+                      data-tour={index === 0 ? "fila" : undefined}
                     >
                       {row.getVisibleCells().map((cell) => {
                         const isActions = cell.column.id === "actions";
@@ -716,7 +718,10 @@ export function AnticiposDataTable({
       )}
 
       {(totalPages > 1 || totalFiltered > 0) && (
-        <div className="flex flex-col-reverse items-stretch justify-between gap-3 px-1 sm:flex-row sm:items-center">
+        <div
+          className="flex flex-col-reverse items-stretch justify-between gap-3 px-1 sm:flex-row sm:items-center"
+          data-tour="paginacion"
+        >
           <p className="text-xs text-muted-foreground tabular-nums">
             {totalRows === 0
               ? "Sin registros."

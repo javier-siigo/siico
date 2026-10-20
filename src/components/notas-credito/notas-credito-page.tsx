@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { ComoUsar } from "@/components/tour/como-usar";
+
 import { HistoryList } from "./history-list";
 import { ResultCard } from "./result-card";
+import { TOUR_NOTAS_CREDITO } from "./tour";
 import { UploadCard } from "./upload-card";
 import type { NotasCreditoRun, NotasCreditoRunStatus } from "./types";
 
@@ -272,19 +275,22 @@ export function NotasCreditoPageClient() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-base font-semibold tracking-tight text-foreground">
-          Notas crédito
-        </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Conciliación de notas crédito contra NetSuite.
-        </p>
-        <p className="max-w-2xl text-xs text-muted-foreground">
-          Sube el archivo{" "}
-          <span className="font-mono">INFORME</span>
-          , ejecuta el flujo y descarga el resultado con las columnas de
-          duplicados resueltas.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="flex min-w-0 flex-col gap-2">
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Notas crédito
+          </h1>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Conciliación de notas crédito contra NetSuite.
+          </p>
+          <p className="max-w-2xl text-xs text-muted-foreground">
+            Sube el archivo{" "}
+            <span className="font-mono">INFORME</span>
+            , ejecuta el flujo y descarga el resultado con las columnas de
+            duplicados resueltas.
+          </p>
+        </div>
+        <ComoUsar steps={TOUR_NOTAS_CREDITO} />
       </header>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

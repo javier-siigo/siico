@@ -79,6 +79,7 @@ export function ResultCard({ run, onDownload, onRetry }: ResultCardProps) {
 
   return (
     <section
+      data-tour="resultado"
       aria-labelledby="result-title"
       aria-live="polite"
       className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-card p-5 shadow-sm"

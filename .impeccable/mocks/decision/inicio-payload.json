@@ -1,0 +1,38 @@
+{
+  "title": "Elige la estructura del Inicio",
+  "question": "Tres formas de organizar el inicio según los roles de cada persona. Todas usan el sistema visual actual del portal; cambia la organización, no el estilo. Elige una, pide otra mano o dirígela.",
+  "options": [
+    {
+      "id": "mesa",
+      "kind": "assigned",
+      "kicker": "THE ROLL",
+      "label": "Mesa por estado",
+      "thesis": "Todo lo que tienes asignado, repartido en tres columnas: Atrasado, En curso y Al día. Se lee de izquierda a derecha como una mesa de control.",
+      "palette": ["#0088DA", "#F3F6FA", "#FFFFFF", "#D93D2E", "#F5B700", "#16A06A"],
+      "viewport": "Saludo con la fecha; tres columnas de tarjetas (anticipos atrasados en rojo, cierre de comisiones en ámbar, conciliaciones al día en verde); accesos a todos los procesos en una fila al final.",
+      "risk": "Si casi todo está al día, dos columnas quedan vacías; necesita buenos estados vacíos.",
+      "html": ".impeccable/mocks/decision/mesa.html"
+    },
+    {
+      "id": "pendientes",
+      "kind": "dealt",
+      "label": "Pendientes primero",
+      "thesis": "Una bandeja ordenada por urgencia con lo que necesita atención hoy, y debajo tus procesos como tarjetas con su cifra en vivo.",
+      "palette": ["#0088DA", "#F3F6FA", "#FFFFFF", "#D93D2E", "#F5B700"],
+      "viewport": "Saludo; lista 'Necesita atención' con 3 a 5 filas accionables; grilla de procesos agrupados por área con indicador y botón directo.",
+      "risk": "La bandeja puede sentirse como una lista de reproches si no tiene tono sereno.",
+      "html": ".impeccable/mocks/decision/pendientes.html"
+    },
+    {
+      "id": "senal",
+      "kind": "dealt",
+      "label": "Banda Siguiente",
+      "thesis": "Reusa la banda oscura del cierre de comisiones: una sola franja arriba dice la próxima acción más importante para ti, y debajo cada área con su estado del mes.",
+      "palette": ["#1F2733", "#F5B700", "#0088DA", "#F3F6FA", "#FFFFFF"],
+      "viewport": "Banda Signal Ink con 'Siguiente: carga el informe diferido de septiembre' y botón; debajo, tarjetas por área con progreso del mes y cifras clave.",
+      "risk": "Una sola acción destacada esconde el resto si la persona tiene varios frentes.",
+      "html": ".impeccable/mocks/decision/senal.html"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] }
+}

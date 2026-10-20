@@ -81,6 +81,7 @@ export function UploadCard({
   return (
     <section
       aria-labelledby="upload-title"
+      data-tour="subir"
       className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-card p-5 shadow-sm"
     >
       <header className="flex flex-col gap-1.5">

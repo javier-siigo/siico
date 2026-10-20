@@ -10,12 +10,14 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { ComoUsar } from "@/components/tour/como-usar";
 import { Button } from "@/components/ui/button";
 import { AnticiposDataTable } from "@/components/anticipos/anticipos-data-table";
 import { AnticiposDeleteDialog } from "@/components/anticipos/anticipos-delete-dialog";
 import { AnticiposEditSheet } from "@/components/anticipos/anticipos-edit-sheet";
 import { AnticiposFormSheet } from "@/components/anticipos/anticipos-form";
 import { ImportarRetiradosSheet } from "@/components/anticipos/importar-retirados/importar-retirados-sheet";
+import { TOUR_ANTICIPOS } from "@/components/anticipos/tour";
 import type { AnticipoRow } from "@/lib/anticipos/schema";
 
 const HIGHLIGHT_ADD_MS = 720;
@@ -145,7 +147,7 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" data-tour="kpis">
         <KpiTile
           icon={<HandCoins className="size-4" />}
           label="Total registros"
@@ -200,6 +202,7 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
               variant="link"
               size="sm"
               onClick={() => setImportOpen(true)}
+              data-tour="importar"
               className="h-auto p-0 text-xs font-medium text-muted-foreground hover:text-foreground"
             >
               {stats.excolaboradores > 0
@@ -217,8 +220,9 @@ export function AnticiposPageClient({ rows }: { rows: AnticipoRow[] }) {
             requerimiento. Importa el reporte de Contabilidad para cruzar
             excolaboradores retirados.
           </p>
-          <div className="flex shrink-0">
-            <Button type="button" onClick={() => setOpen(true)}>
+          <div className="flex shrink-0 gap-2">
+            <ComoUsar steps={TOUR_ANTICIPOS} className="h-9" />
+            <Button type="button" onClick={() => setOpen(true)} data-tour="nuevo">
               <Plus className="size-4" />
               Nuevo registro
             </Button>

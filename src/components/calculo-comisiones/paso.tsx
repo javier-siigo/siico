@@ -43,6 +43,7 @@ export function Paso({
   return (
     <section
       id={`paso-${n}`}
+      data-tour={`paso-${n}`}
       aria-labelledby={`paso-${n}-titulo`}
       className={cn(
         "scroll-mt-44 rounded-lg border bg-card shadow-sm transition-colors",

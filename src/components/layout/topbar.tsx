@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import type { UserRolesInfo } from "@/lib/auth/roles-shared";
+import { isAdmin, type UserRolesInfo } from "@/lib/auth/roles-shared";
 import { findArea, findProceso } from "@/lib/navigation";
 
 import { ThemeToggle } from "./theme-toggle";
@@ -40,10 +40,14 @@ function resolveContext(pathname: string | null): ContextInfo | null {
     return null;
   }
 
+  // Índice de un área (p. ej. /documentacion).
+  const area = first ? findArea(first) : undefined;
+  if (area) return { title: area.label };
+
   return null;
 }
 
-export function Topbar({ user, roles: _roles }: TopbarProps) {
+export function Topbar({ user, roles }: TopbarProps) {
   const pathname = usePathname();
   const context = resolveContext(pathname);
 
@@ -66,7 +70,7 @@ export function Topbar({ user, roles: _roles }: TopbarProps) {
       )}
       <div className="flex items-center gap-1">
         <ThemeToggle />
-        <UserMenu name={user.name} email={user.email} />
+        <UserMenu name={user.name} email={user.email} esAdmin={isAdmin(roles)} />
       </div>
     </header>
   );

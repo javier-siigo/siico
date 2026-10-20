@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ArrowDown, Download, Loader2, Save, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { ComoUsar } from "@/components/tour/como-usar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -45,6 +46,7 @@ import { RevisionPanel } from "./revision-panel";
 import { InformePanel } from "./informe-panel";
 import { SeguimientoTab } from "./seguimiento-tab";
 import { SiguienteBand, type SenalSiguiente } from "./siguiente-band";
+import { TOUR_COMISIONES } from "./tour";
 import { useInformeDiferido } from "./use-informe-diferido";
 
 interface CalculoComisionesPageClientProps {
@@ -538,7 +540,7 @@ export function CalculoComisionesPageClient({
       )}
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="gap-0">
-        <header className="flex w-full flex-col gap-4 pb-1 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+        <header className="flex w-full flex-col gap-4 pb-1 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
           <div className="flex min-w-0 flex-col gap-1.5">
             <h1 className="text-base font-semibold tracking-tight text-foreground">
               Cálculo de Comisiones
@@ -548,10 +550,13 @@ export function CalculoComisionesPageClient({
               reconoce el ingreso de las facturas F93 y F94 emitidas ese mes.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 md:flex-nowrap md:justify-end">
+          <div className="flex flex-wrap items-center gap-3 xl:flex-nowrap xl:justify-end">
+            <ComoUsar steps={TOUR_COMISIONES} className="h-9" />
             <TabsList>
               <TabsTrigger value="cierre">Cierre del mes</TabsTrigger>
-              <TabsTrigger value="seguimiento">Seguimiento</TabsTrigger>
+              <TabsTrigger value="seguimiento" data-tour="seguimiento">
+                Seguimiento
+              </TabsTrigger>
             </TabsList>
             <PeriodoPicker
               value={periodo}

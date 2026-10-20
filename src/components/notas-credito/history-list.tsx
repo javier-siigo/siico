@@ -24,6 +24,7 @@ export function HistoryList({ runs, onDownload }: HistoryListProps) {
   return (
     <section
       aria-labelledby="history-title"
+      data-tour="historial"
       className="flex min-w-0 flex-col gap-3"
     >
       <header className="flex items-baseline justify-between gap-3">
