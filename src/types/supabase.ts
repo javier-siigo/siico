@@ -365,6 +365,7 @@ export type Database = {
           campos: string[]
           created_at: string
           created_by: string | null
+          filtros: Json
           id: string
           nombre: string
           updated_at: string
@@ -374,6 +375,7 @@ export type Database = {
           campos?: string[]
           created_at?: string
           created_by?: string | null
+          filtros?: Json
           id?: string
           nombre: string
           updated_at?: string
@@ -383,12 +385,54 @@ export type Database = {
           campos?: string[]
           created_at?: string
           created_by?: string | null
+          filtros?: Json
           id?: string
           nombre?: string
           updated_at?: string
           updated_by?: string | null
         }
         Relationships: []
+      }
+      netsuite_campo_valores: {
+        Row: {
+          actualizado_at: string
+          campo_id: string
+          desde: string
+          dias_sin_datos: number
+          distintos: number
+          hasta: string
+          truncado: boolean
+          valores: Json
+        }
+        Insert: {
+          actualizado_at?: string
+          campo_id: string
+          desde: string
+          dias_sin_datos?: number
+          distintos?: number
+          hasta: string
+          truncado?: boolean
+          valores?: Json
+        }
+        Update: {
+          actualizado_at?: string
+          campo_id?: string
+          desde?: string
+          dias_sin_datos?: number
+          distintos?: number
+          hasta?: string
+          truncado?: boolean
+          valores?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "netsuite_campo_valores_campo_id_fkey"
+            columns: ["campo_id"]
+            isOneToOne: true
+            referencedRelation: "netsuite_campos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       netsuite_campos: {
         Row: {
@@ -429,6 +473,21 @@ export type Database = {
           tabla?: string
           tipo?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          last_seen_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -494,6 +553,7 @@ export type Database = {
         Args: { n: string }
         Returns: string
       }
+      touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {
       anticipos_falta_enum:

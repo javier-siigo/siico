@@ -105,9 +105,9 @@ export const AREAS: Area[] = [
       },
       {
         slug: "export-bancos",
-        label: "Movimientos bancarios NetSuite",
+        label: "Auditoría Asientos de Diario",
         description:
-          "Exporta a Excel las líneas contables de cuentas bancarias de un rango de fechas.",
+          "Exporta a Excel las líneas contables de NetSuite de un periodo: bancos o, por tipo de cuenta, todos los documentos.",
         icon: Landmark,
       },
     ],

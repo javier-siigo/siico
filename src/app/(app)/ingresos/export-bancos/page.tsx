@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 export const maxDuration = 60;
 
 export const metadata = {
-  title: "Movimientos bancarios NetSuite",
+  title: "Auditoría Asientos de Diario",
 };
 
 export default async function ExportBancosPage() {

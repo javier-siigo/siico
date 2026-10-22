@@ -5,10 +5,11 @@ import { z } from "zod";
 
 import { getUserRoles, hasIngresosOrAdmin, isAdmin } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
-import type { Database } from "@/types/supabase";
+import type { Database, Json } from "@/types/supabase";
 
 import {
   CAMPO_RE,
+  CAMPOS_TERCERO,
   TABLAS,
   TIPOS,
   claveCampo,
@@ -17,6 +18,7 @@ import {
   type Plantilla,
 } from "./campos";
 import { NetSuiteError } from "./client";
+import { filtrosSchema, parseFiltrosGuardados, type Filtro } from "./filtros";
 import { descubrirCampos } from "./descubrir";
 
 const PATH = "/ingresos/export-bancos";
@@ -63,6 +65,9 @@ const nuevoCampoSchema = z
   })
   .refine((c) => c.modo === "valor" || c.tipo === "text", {
     message: "Los campos con nombre visible (BUILTIN.DF) son de tipo texto",
+  })
+  .refine((c) => c.tabla !== "ter" || (c.campo in CAMPOS_TERCERO && c.modo === "valor"), {
+    message: "Los campos de Tercero son fijos: documento o nombre",
   });
 
 const SESION_EXPIRADA = "Tu sesión expiró. Vuelve a iniciar sesión.";
@@ -115,7 +120,7 @@ export async function getCamposData(admin: boolean): Promise<CamposData> {
   if (!admin) camposQuery = camposQuery.eq("habilitado", true);
   const [camposRes, plantillasRes] = await Promise.all([
     camposQuery,
-    supabase.from("export_bancos_plantillas").select("id, nombre, campos, updated_at").order("nombre"),
+    supabase.from("export_bancos_plantillas").select("id, nombre, campos, filtros, updated_at").order("nombre"),
   ]);
   const error = camposRes.error ?? plantillasRes.error;
   if (error) throw new Error(dbError(error.message, error.code));
@@ -125,6 +130,7 @@ export async function getCamposData(admin: boolean): Promise<CamposData> {
       id: p.id,
       nombre: p.nombre,
       campos: p.campos,
+      filtros: parseFiltrosGuardados(p.filtros),
       updatedAt: p.updated_at,
     })),
   };
@@ -233,35 +239,53 @@ export async function ordenarCampos(ids: string[]): Promise<ActionResult> {
 // ---------------------------------------------------------------------------
 // Plantillas (equipo de ingresos)
 
-export async function crearPlantilla(nombre: string, campos: string[]): Promise<ActionResult<Plantilla>> {
+export async function crearPlantilla(
+  nombre: string,
+  campos: string[],
+  filtros: Filtro[] = [],
+): Promise<ActionResult<Plantilla>> {
   const n = nombrePlantillaSchema.safeParse(nombre);
   if (!n.success) return { ok: false, error: primerError(n.error, "Nombre inválido") };
   const c = idsSchema.safeParse(campos);
   if (!c.success) return { ok: false, error: primerError(c.error, "Campos inválidos") };
+  const f = filtrosSchema.safeParse(filtros);
+  if (!f.success) return { ok: false, error: primerError(f.error, "Filtros inválidos") };
   const { supabase, error } = await requireIngresosAction();
   if (error) return { ok: false, error };
 
   const { data, error: dbErr } = await supabase
     .from("export_bancos_plantillas")
-    .insert({ nombre: n.data, campos: c.data })
-    .select("id, nombre, campos, updated_at")
+    .insert({ nombre: n.data, campos: c.data, filtros: f.data as Json })
+    .select("id, nombre, campos, filtros, updated_at")
     .single();
   if (dbErr) return { ok: false, error: dbError(dbErr.message, dbErr.code) };
 
   revalidatePath(PATH);
   return {
     ok: true,
-    data: { id: data.id, nombre: data.nombre, campos: data.campos, updatedAt: data.updated_at },
+    data: {
+      id: data.id,
+      nombre: data.nombre,
+      campos: data.campos,
+      filtros: parseFiltrosGuardados(data.filtros),
+      updatedAt: data.updated_at,
+    },
   };
 }
 
 export async function actualizarPlantilla(
   id: string,
-  patch: { nombre?: string; campos?: string[] },
+  patch: { nombre?: string; campos?: string[]; filtros?: Filtro[] },
 ): Promise<ActionResult> {
   const { supabase, userId, error } = await requireIngresosAction();
   if (error) return { ok: false, error };
-  const update: { nombre?: string; campos?: string[]; updated_at: string; updated_by: string } = {
+  const update: {
+    nombre?: string;
+    campos?: string[];
+    filtros?: Json;
+    updated_at: string;
+    updated_by: string;
+  } = {
     updated_at: new Date().toISOString(),
     updated_by: userId!,
   };
@@ -274,6 +298,11 @@ export async function actualizarPlantilla(
     const c = idsSchema.safeParse(patch.campos);
     if (!c.success) return { ok: false, error: primerError(c.error, "Campos inválidos") };
     update.campos = c.data;
+  }
+  if (patch.filtros !== undefined) {
+    const f = filtrosSchema.safeParse(patch.filtros);
+    if (!f.success) return { ok: false, error: primerError(f.error, "Filtros inválidos") };
+    update.filtros = f.data as Json;
   }
 
   const { error: dbErr } = await supabase.from("export_bancos_plantillas").update(update).eq("id", id);

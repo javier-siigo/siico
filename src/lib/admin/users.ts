@@ -9,6 +9,7 @@ import {
   isAdmin,
   ALL_ROLES,
   KNOWN_PAISES,
+  ROLE_ADMIN,
   ROLE_CONCILIACIONES,
 } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
@@ -43,6 +44,7 @@ export async function listUsersWithRoles(): Promise<
     roles: string[];
     paises: string[];
     lastSignInAt: string | null;
+    lastSeenAt: string | null;
   }[]
 > {
   await requireCurrentAdmin();
@@ -61,6 +63,14 @@ export async function listUsersWithRoles(): Promise<
     });
   }
 
+  const { data: activityData, error: activityError } = await admin
+    .from("user_activity")
+    .select("user_id, last_seen_at");
+  if (activityError) throw new Error(activityError.message);
+  const lastSeen = new Map<string, string>(
+    (activityData ?? []).map((row) => [row.user_id as string, row.last_seen_at as string]),
+  );
+
   const seen = new Set<string>();
   const merged: {
     id: string;
@@ -68,6 +78,7 @@ export async function listUsersWithRoles(): Promise<
     roles: string[];
     paises: string[];
     lastSignInAt: string | null;
+    lastSeenAt: string | null;
   }[] = [];
   let page = 1;
   while (true) {
@@ -83,6 +94,7 @@ export async function listUsersWithRoles(): Promise<
         roles: r.roles,
         paises: r.paises,
         lastSignInAt: u.last_sign_in_at ?? null,
+        lastSeenAt: lastSeen.get(u.id) ?? null,
       });
     }
     if (data.users.length < 200) break;
@@ -97,6 +109,7 @@ export async function listUsersWithRoles(): Promise<
         roles: r.roles,
         paises: r.paises,
         lastSignInAt: null,
+        lastSeenAt: null,
       });
     }
   }
@@ -108,7 +121,7 @@ export async function listUsersWithRoles(): Promise<
 export async function updateUserRoles(
   input: UpdateUserRolesInput,
 ): Promise<UpdateUserRolesResult> {
-  await requireCurrentAdmin();
+  const currentUserId = await requireCurrentAdmin();
   const parsed = updateSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -119,6 +132,10 @@ export async function updateUserRoles(
   }
 
   const rolesSet = new Set(parsed.data.roles);
+  // Evita que un admin se quede fuera de esta misma pantalla.
+  if (parsed.data.userId === currentUserId && !rolesSet.has(ROLE_ADMIN)) {
+    return { ok: false, error: "No puedes quitarte tu propio rol Admin." };
+  }
   const paises =
     rolesSet.has(ROLE_CONCILIACIONES) ? parsed.data.paises : [];
 
@@ -134,6 +151,31 @@ export async function updateUserRoles(
       },
       { onConflict: "user_id" },
     );
+  if (error) return { ok: false, error: error.message };
+
+  revalidateTag("user-roles", "max");
+  return { ok: true };
+}
+/**
+ * Borra el registro de roles de un usuario que ya no existe en Auth.
+ * Se niega si la cuenta sigue existiendo, para no usarlo como "quitar acceso".
+ */
+export async function deleteOrphanRoles(
+  userId: string,
+): Promise<UpdateUserRolesResult> {
+  await requireCurrentAdmin();
+  const parsed = z.string().uuid("userId inválido").safeParse(userId);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "userId inválido" };
+  }
+
+  const admin = createAdminClient();
+  const { data } = await admin.auth.admin.getUserById(parsed.data);
+  if (data?.user) {
+    return { ok: false, error: "El usuario tiene cuenta en Auth; quítale los roles en su lugar." };
+  }
+
+  const { error } = await admin.from("user_roles").delete().eq("user_id", parsed.data);
   if (error) return { ok: false, error: error.message };
 
   revalidateTag("user-roles", "max");

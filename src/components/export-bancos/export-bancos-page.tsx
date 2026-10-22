@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import type { CampoCatalogo, Plantilla } from "@/lib/netsuite/campos";
+import { ordenColumnas, type CampoCatalogo, type Plantilla } from "@/lib/netsuite/campos";
+import {
+  filtroActivo,
+  filtrosValidos,
+  mismosFiltros,
+  type Filtro,
+} from "@/lib/netsuite/filtros";
 import {
   MAX_DIAS_EXPORT,
   diasDelRango,
@@ -19,6 +25,7 @@ import {
 } from "@/lib/netsuite/rango-fechas";
 
 import { CamposCard, mismosIds } from "./campos-card";
+import { FiltrosCard } from "./filtros-card";
 import { TOUR_EXPORT_BANCOS } from "./tour";
 
 type ExportState =
@@ -39,6 +46,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   forbidden: "No tienes permisos para esta exportación.",
   invalid_range: "El rango de fechas no es válido.",
   invalid_fields: "Selecciona al menos un campo habilitado.",
+  invalid_filters: "Revisa los filtros: alguno no es válido.",
   netsuite_config: "Falta configurar las credenciales de NetSuite en el servidor.",
   netsuite_auth: "NetSuite rechazó la autenticación.",
   netsuite_query: "NetSuite devolvió un error al consultar los movimientos.",
@@ -121,6 +129,10 @@ export function ExportBancosPageClient({
     const validos = new Set(habilitados.map((c) => c.id));
     return p ? new Set(p.campos.filter((id) => validos.has(id))) : validos;
   });
+  const [filtros, setFiltros] = useState<Filtro[]>(() => {
+    const p = plantillas.find((x) => x.id === plantillaId);
+    return p ? filtrosValidos(p.filtros, new Set(habilitados.map((c) => c.id))) : [];
+  });
   const [state, setState] = useState<ExportState>({ status: "idle" });
   const [now, setNow] = useState(() => Date.now());
   const abortRef = useRef<AbortController | null>(null);
@@ -146,17 +158,20 @@ export function ExportBancosPageClient({
   const rangoError = validarRango(fechaInicio, fechaFin);
   const dias = rangoError ? 0 : diasDelRango(fechaInicio, fechaFin).length;
   const busy = state.status === "processing";
+  const plantilla = plantillas.find((p) => p.id === plantillaId) ?? null;
   // Solo ids que sigan habilitados (un admin pudo deshabilitar alguno).
-  const camposElegidos = habilitados.filter((c) => seleccion.has(c.id)).map((c) => c.id);
+  const camposElegidos = ordenColumnas(seleccion, habilitados, plantilla?.campos);
+  const filtrosActivos = useMemo(() => filtros.filter(filtroActivo), [filtros]);
   const sinCampos = camposElegidos.length === 0;
 
-  const plantilla = plantillas.find((p) => p.id === plantillaId) ?? null;
   const nombreSeleccion = useMemo(() => {
     if (!plantilla) return "Selección propia";
     const validos = new Set(habilitados.map((c) => c.id));
     const ids = new Set(plantilla.campos.filter((id) => validos.has(id)));
-    return mismosIds(seleccion, ids) ? plantilla.nombre : `${plantilla.nombre} (modificada)`;
-  }, [plantilla, habilitados, seleccion]);
+    const iguales =
+      mismosIds(seleccion, ids) && mismosFiltros(filtros, filtrosValidos(plantilla.filtros, validos));
+    return iguales ? plantilla.nombre : `${plantilla.nombre} (modificada)`;
+  }, [plantilla, habilitados, seleccion, filtros]);
 
   const elegirRango = (inicio: string, fin: string) => {
     setFechaInicio(inicio);
@@ -180,7 +195,12 @@ export function ExportBancosPageClient({
       const res = await fetch("/api/export-bancos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fechaInicio, fechaFin, campos: camposElegidos }),
+        body: JSON.stringify({
+          fechaInicio,
+          fechaFin,
+          campos: camposElegidos,
+          filtros: filtrosActivos,
+        }),
         signal: controller.signal,
       });
       if (!res.ok) {
@@ -209,7 +229,7 @@ export function ExportBancosPageClient({
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [fechaInicio, fechaFin, camposElegidos]);
+  }, [fechaInicio, fechaFin, camposElegidos, filtrosActivos]);
 
   const cancelar = () => {
     abortRef.current?.abort();
@@ -226,11 +246,12 @@ export function ExportBancosPageClient({
       <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Movimientos bancarios NetSuite
+            Auditoría Asientos de Diario
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Exporta a un solo Excel las líneas contables de cuentas bancarias (sin asientos de
-            diario) de un periodo de hasta {MAX_DIAS_EXPORT} días.
+            Exporta a un solo Excel las líneas contables de un periodo de hasta {MAX_DIAS_EXPORT}{" "}
+            días: de cuentas bancarias (sin asientos de diario) o, con un filtro de Tipo Cuenta, todos
+            los documentos contables de esas cuentas.
           </p>
         </div>
         <ComoUsar steps={TOUR_EXPORT_BANCOS} />
@@ -288,7 +309,7 @@ export function ExportBancosPageClient({
             })}
           </div>
 
-          <div className="grid grid-cols-2 gap-3" data-tour="fechas">
+          <div className="mt-auto grid grid-cols-2 gap-3" data-tour="fechas">
             <div className="flex min-w-0 flex-col gap-1.5">
               <Label htmlFor="fecha-inicio">Desde</Label>
               <Input
@@ -332,6 +353,19 @@ export function ExportBancosPageClient({
                   {etiquetaRango(fechaInicio, fechaFin)}
                   <span className="ml-2 font-mono tabular-nums text-muted-foreground">
                     {dias} {dias === 1 ? "día" : "días"}
+                  </span>
+                </>
+              )}
+            </dd>
+            <dt className="text-muted-foreground">Filtros</dt>
+            <dd className="min-w-0 truncate text-right text-foreground">
+              {filtrosActivos.length === 0 ? (
+                <span className="text-muted-foreground">Ninguno, todas las líneas</span>
+              ) : (
+                <>
+                  <span className="font-mono tabular-nums">{filtrosActivos.length}</span>
+                  <span className="ml-2 text-muted-foreground">
+                    {filtrosActivos.length === 1 ? "filtro activo" : "filtros activos"}
                   </span>
                 </>
               )}
@@ -386,16 +420,26 @@ export function ExportBancosPageClient({
           No se pudo cargar el catálogo de campos: {errorCampos}
         </p>
       ) : (
-        <CamposCard
-          campos={campos}
-          plantillas={plantillas}
-          esAdmin={esAdmin}
-          seleccion={seleccion}
-          onSeleccionChange={setSeleccion}
-          plantillaId={plantillaId}
-          onPlantillaChange={setPlantillaId}
-          disabled={busy}
-        />
+        <>
+          <FiltrosCard
+            campos={habilitados}
+            filtros={filtros}
+            onFiltrosChange={setFiltros}
+            disabled={busy}
+          />
+          <CamposCard
+            campos={campos}
+            plantillas={plantillas}
+            esAdmin={esAdmin}
+            seleccion={seleccion}
+            onSeleccionChange={setSeleccion}
+            filtros={filtros}
+            onFiltrosChange={setFiltros}
+            plantillaId={plantillaId}
+            onPlantillaChange={setPlantillaId}
+            disabled={busy}
+          />
+        </>
       )}
     </div>
   );
@@ -420,7 +464,8 @@ function EstadoExportacion({
     >
       {state.status === "idle" && (
         <p className="text-sm text-muted-foreground">
-          Un mes completo suele tardar alrededor de un minuto. El enlace de descarga dura 1 hora.
+          Un mes de bancos suele tardar alrededor de un minuto; uno de ingresos, unos 3. El enlace
+          de descarga dura 1 hora.
         </p>
       )}
 

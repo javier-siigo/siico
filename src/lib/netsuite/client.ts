@@ -35,7 +35,7 @@ export interface NetSuiteConfig {
   tokenUrl: string;
 }
 
-const PAGE_SIZE = 1000;
+export const PAGE_SIZE = 1000;
 /** Límite de resultados por query del endpoint REST de SuiteQL. */
 export const SUITEQL_MAX_RESULTS = 100_000;
 const MAX_ATTEMPTS = 5;
@@ -309,6 +309,30 @@ export async function suiteQLPage(
   return page.items ?? [];
 }
 
+/** Primera página con el total de resultados que reporta NetSuite. */
+export async function suiteQLPageInfo(
+  config: NetSuiteConfig,
+  token: string,
+  query: string,
+  limit: number,
+  signal?: AbortSignal,
+): Promise<{ items: Record<string, unknown>[]; total: number | undefined }> {
+  const page = await fetchSuiteQLPage(config, token, query, limit, 0, signal);
+  return { items: page.items ?? [], total: page.totalResults };
+}
+
+/** Una página en `offset` con el total de la consulta (para paginar en paralelo). */
+export async function suiteQLPageAt(
+  config: NetSuiteConfig,
+  token: string,
+  query: string,
+  offset: number,
+  signal?: AbortSignal,
+): Promise<{ items: Record<string, unknown>[]; total: number | undefined }> {
+  const page = await fetchSuiteQLPage(config, token, query, PAGE_SIZE, offset, signal);
+  return { items: page.items ?? [], total: page.totalResults };
+}
+
 /**
  * Ejecuta una query SuiteQL completa (todas las páginas). SuiteQL omite los
  * campos nulos, así que cada fila se completa con `columns` en `null`.
@@ -364,4 +388,27 @@ export async function runSuiteQL<C extends string>(
     );
   }
   return rows;
+}
+
+/**
+ * Nombres de los tipos de registro de la cuenta (REST metadata-catalog).
+ * Incluye los tipos de transacción personalizados aunque no tengan
+ * transacciones, cosa que SuiteQL no expone.
+ */
+export async function tiposDeRegistro(
+  config: NetSuiteConfig,
+  token: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  const res = await fetchWithRetry(
+    `${config.baseUrl}/record/v1/metadata-catalog`,
+    { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } },
+    signal,
+  );
+  if (!res.ok) {
+    const detail = await upstreamDetail(res);
+    throw new NetSuiteError(`Error del catálogo de registros (${res.status}): ${detail}`, "netsuite_query");
+  }
+  const json = (await res.json()) as { items?: { name?: string }[] };
+  return (json.items ?? []).map((i) => i.name).filter((n): n is string => typeof n === "string");
 }

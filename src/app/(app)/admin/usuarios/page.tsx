@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation";
 
+import { UsuariosPage } from "@/components/admin-usuarios/usuarios-page";
 import { PageTransition } from "@/components/motion/page-transition";
 import { getUserRoles, isAdmin } from "@/lib/auth/roles";
 import { listUsersWithRoles } from "@/lib/admin/users";
 import { createClient } from "@/lib/supabase/server";
-
-import { UsersTable } from "./users-table";
 
 export const metadata = {
   title: "Usuarios y roles",
@@ -28,15 +27,13 @@ export default async function AdminUsuariosPage() {
             Usuarios y roles
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Asigna a cada miembro del equipo los roles del portal. Los
-            usuarios con rol <strong>Admin</strong> ven todas las áreas y
-            pueden gestionar estos permisos. El rol <strong>Conciliaciones</strong>{" "}
-            requiere además seleccionar los países específicos a los que el
-            usuario tendrá acceso.
+            Decide qué puede ver cada persona del equipo. <strong>Admin</strong> ve
+            todas las áreas y gestiona estos permisos; <strong>Conciliaciones</strong>{" "}
+            solo abre los países que marques.
           </p>
         </header>
 
-        <UsersTable users={users} />
+        <UsuariosPage users={users} currentUserId={data.claims.sub} />
       </div>
     </PageTransition>
   );

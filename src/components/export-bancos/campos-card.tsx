@@ -53,9 +53,16 @@ import {
   TABLAS,
   TABLA_LABEL,
   TIPO_LABEL,
+  ordenColumnas,
   type CampoCatalogo,
   type Plantilla,
 } from "@/lib/netsuite/campos";
+import {
+  filtroActivo,
+  filtrosValidos,
+  mismosFiltros,
+  type Filtro,
+} from "@/lib/netsuite/filtros";
 import {
   actualizarPlantilla,
   crearPlantilla,
@@ -73,6 +80,9 @@ interface CamposCardProps {
   esAdmin: boolean;
   seleccion: Set<string>;
   onSeleccionChange: (next: Set<string>) => void;
+  /** Los filtros viajan con la plantilla. */
+  filtros: Filtro[];
+  onFiltrosChange: (next: Filtro[]) => void;
   plantillaId: string | null;
   onPlantillaChange: (id: string | null) => void;
   disabled: boolean;
@@ -90,6 +100,8 @@ export function CamposCard({
   esAdmin,
   seleccion,
   onSeleccionChange,
+  filtros,
+  onFiltrosChange,
   plantillaId,
   onPlantillaChange,
   disabled,
@@ -107,7 +119,14 @@ export function CamposCard({
     const validos = new Set(habilitados.map((c) => c.id));
     return new Set((plantilla?.campos ?? []).filter((id) => validos.has(id)));
   }, [plantilla, habilitados]);
-  const conCambios = plantilla !== null && !mismosIds(seleccion, idsPlantilla);
+  const filtrosPlantilla = useMemo(
+    () => filtrosValidos(plantilla?.filtros ?? [], new Set(habilitados.map((c) => c.id))),
+    [plantilla, habilitados],
+  );
+  const conCambios =
+    plantilla !== null &&
+    (!mismosIds(seleccion, idsPlantilla) || !mismosFiltros(filtros, filtrosPlantilla));
+  const filtrosAGuardar = () => filtros.filter(filtroActivo);
 
   const q = busqueda.trim().toLowerCase();
   const visibles = q
@@ -128,6 +147,7 @@ export function CamposCard({
     const validos = new Set(habilitados.map((c) => c.id));
     onPlantillaChange(p.id);
     onSeleccionChange(new Set(p.campos.filter((cid) => validos.has(cid))));
+    onFiltrosChange(filtrosValidos(p.filtros, validos));
   };
 
   const toggle = (id: string, checked: boolean) => {
@@ -146,13 +166,16 @@ export function CamposCard({
     onSeleccionChange(next);
   };
 
-  /** Ids seleccionados en el orden del catálogo. */
-  const idsOrdenados = () => habilitados.filter((c) => seleccion.has(c.id)).map((c) => c.id);
+  /** Ids seleccionados en el orden de la plantilla y luego del catálogo. */
+  const idsOrdenados = () => ordenColumnas(seleccion, habilitados, plantilla?.campos);
 
   const guardarCambios = () => {
     if (!plantilla) return;
     startTransition(async () => {
-      const res = await actualizarPlantilla(plantilla.id, { campos: idsOrdenados() });
+      const res = await actualizarPlantilla(plantilla.id, {
+        campos: idsOrdenados(),
+        filtros: filtrosAGuardar(),
+      });
       if (!res.ok) {
         toast.error(res.error);
         return;
@@ -163,7 +186,7 @@ export function CamposCard({
 
   const guardarComo = () => {
     startTransition(async () => {
-      const res = await crearPlantilla(nombreNueva, idsOrdenados());
+      const res = await crearPlantilla(nombreNueva, idsOrdenados(), filtrosAGuardar());
       if (!res.ok) {
         toast.error(res.error);
         return;
@@ -205,7 +228,10 @@ export function CamposCard({
           <p className="text-sm text-muted-foreground">
             <span className="font-mono tabular-nums">{seleccion.size}</span> de{" "}
             <span className="font-mono tabular-nums">{habilitados.length}</span>{" "}
-            seleccionados · las columnas salen en el orden del catálogo.
+            seleccionados ·{" "}
+            {plantilla
+              ? "las columnas salen en el orden de la plantilla; las que agregues, al final."
+              : "las columnas salen en el orden del catálogo."}
           </p>
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -298,10 +324,13 @@ export function CamposCard({
               variant="ghost"
               size="icon"
               className="size-9"
-              onClick={() => onSeleccionChange(new Set(idsPlantilla))}
+              onClick={() => {
+                onSeleccionChange(new Set(idsPlantilla));
+                onFiltrosChange(filtrosPlantilla);
+              }}
               disabled={disabled || isPending}
-              aria-label={`Restablecer los campos de "${plantilla.nombre}"`}
-              title={`Restablecer los campos de "${plantilla.nombre}"`}
+              aria-label={`Restablecer campos y filtros de "${plantilla.nombre}"`}
+              title={`Restablecer campos y filtros de "${plantilla.nombre}"`}
             >
               <RotateCcw className="size-4" aria-hidden />
             </Button>
@@ -391,8 +420,10 @@ export function CamposCard({
           <DialogHeader>
             <DialogTitle>Guardar plantilla</DialogTitle>
             <DialogDescription>
-              Guarda los {seleccion.size} campos seleccionados con un nombre. Todo el
-              equipo de ingresos la verá.
+              Guarda los {seleccion.size} campos seleccionados
+              {filtrosAGuardar().length > 0 &&
+                ` y ${filtrosAGuardar().length === 1 ? "el filtro" : `los ${filtrosAGuardar().length} filtros`}`}{" "}
+              con un nombre. Todo el equipo de ingresos la verá.
             </DialogDescription>
           </DialogHeader>
           <form

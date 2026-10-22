@@ -3,6 +3,8 @@ import { createServerClient } from "@supabase/ssr";
 
 const PUBLIC_PATHS = new Set<string>(["/login"]);
 const PUBLIC_PREFIXES = ["/api/public", "/_next", "/favicon", "/icons"];
+const SEEN_COOKIE = "siico_seen";
+const SEEN_INTERVAL_SECONDS = 5 * 60;
 
 /**
  * Solo permite redirecciones internas. `from` viene del query string, así que
@@ -68,6 +70,23 @@ export async function proxy(request: NextRequest) {
 
   if (!hasSession && pathname === "/") {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Última actividad para la pantalla de admin. La cookie evita ir a la BD en
+  // cada request; la función además ignora llamadas a menos de 5 min.
+  if (hasSession && !request.cookies.has(SEEN_COOKIE)) {
+    try {
+      await supabase.rpc("touch_last_seen");
+    } catch {
+      // No bloquear la navegación por un registro de actividad.
+    }
+    response.cookies.set(SEEN_COOKIE, "1", {
+      maxAge: SEEN_INTERVAL_SECONDS,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+      path: "/",
+    });
   }
 
   return response;

@@ -2,7 +2,7 @@ import "server-only";
 
 import {
   CAMPO_RE,
-  TABLAS,
+  TABLAS_NETSUITE,
   claveCampo,
   type CampoDescubierto,
   type ModoCampo,
@@ -84,7 +84,7 @@ export async function descubrirCampos(existentes: Set<string>): Promise<CampoDes
   const token = await getAccessToken(config, signal);
 
   const muestras: { tabla: Tabla; items: Record<string, unknown>[] }[] = [];
-  const tareas = TABLAS.flatMap((tabla) =>
+  const tareas = TABLAS_NETSUITE.flatMap((tabla) =>
     diasDeMuestra().map((dia) => async () => {
       const items = await suiteQLPage(
         config,
@@ -169,6 +169,7 @@ export async function descubrirCampos(existentes: Set<string>): Promise<CampoDes
   return out.sort((a, b) =>
     a.tabla === b.tabla
       ? Number(a.personalizado) - Number(b.personalizado) || a.campo.localeCompare(b.campo)
-      : TABLAS.indexOf(a.tabla) - TABLAS.indexOf(b.tabla),
+      : TABLAS_NETSUITE.indexOf(a.tabla as (typeof TABLAS_NETSUITE)[number]) -
+        TABLAS_NETSUITE.indexOf(b.tabla as (typeof TABLAS_NETSUITE)[number]),
   );
 }
