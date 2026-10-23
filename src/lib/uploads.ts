@@ -10,6 +10,15 @@ export const ACCEPTED_MIME_PREFIXES = [
   "application/octet-stream",
 ] as const;
 
+// La conciliación anterior es el Excel que entregan los contadores; n8n solo lee .xlsx.
+export const PREVIO_ACCEPTED_EXTENSION = ".xlsx";
+export const PREVIO_INVALID_TYPE_MESSAGE =
+  "La conciliación anterior debe ser un archivo .xlsx.";
+
+export function isXlsxFilename(filename: string): boolean {
+  return filename.toLowerCase().endsWith(PREVIO_ACCEPTED_EXTENSION);
+}
+
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 export const MAX_FILE_SIZE_LABEL = "10 MB";
 

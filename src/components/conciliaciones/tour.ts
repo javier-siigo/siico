@@ -24,9 +24,9 @@ export function tourConciliaciones(pais: string): TourStep[] {
     },
     {
       target: "previo",
-      title: "Reporte previo (opcional)",
+      title: "Conciliación anterior (opcional)",
       description:
-        "Si tienes el reporte previo, súbelo aquí para que se tenga en cuenta. Si no, deja este espacio vacío y procesa solo con el extracto.",
+        "Si tienes el Excel de la conciliación anterior que entregan los contadores (.xlsx), súbelo aquí para que se tenga en cuenta. Si no, deja este espacio vacío y procesa solo con el extracto.",
       side: "top",
     },
     {

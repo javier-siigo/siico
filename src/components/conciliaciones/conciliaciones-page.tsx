@@ -9,6 +9,7 @@ import { DualUploadCard } from "./dual-upload-card";
 import { tourConciliaciones } from "./tour";
 import { ComoUsar } from "@/components/tour/como-usar";
 import { Button } from "@/components/ui/button";
+import { PREVIO_INVALID_TYPE_MESSAGE, isXlsxFilename } from "@/lib/uploads";
 import type {
   BancoConciliacion,
   ConciliacionRun,
@@ -54,6 +55,12 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
 
 function asErrorCode(value: string | undefined): ErrorCode {
   return value && value in ERROR_MESSAGES ? (value as ErrorCode) : "internal";
+}
+
+function parseCountHeader(value: string | null): number | undefined {
+  if (value === null || value.trim() === "") return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 function createRunId(): string {
@@ -115,6 +122,10 @@ export function ConciliacionesPageClient({
   }, []);
 
   const handleSelectPrevio = React.useCallback((file: File) => {
+    if (!isXlsxFilename(file.name)) {
+      toast.error(PREVIO_INVALID_TYPE_MESSAGE);
+      return;
+    }
     setPrevioFile(file);
   }, []);
 
@@ -266,6 +277,13 @@ export function ConciliacionesPageClient({
           /filename="?([^";]+)"?/i.exec(cd)?.[1] ??
           `resultado_${bancoSel.slug}.xlsx`;
 
+        const registrosNuevos = parseCountHeader(
+          conciliarRes.headers.get("x-registros-nuevos"),
+        );
+        const registrosExistentes = parseCountHeader(
+          conciliarRes.headers.get("x-registros-existentes"),
+        );
+
         const decodedFilename = (() => {
           try {
             return decodeURIComponent(filename);
@@ -284,6 +302,8 @@ export function ConciliacionesPageClient({
           resultContentType: contentType,
           resultFilename: decodedFilename,
           resultSize: blob.size,
+          registrosNuevos,
+          registrosExistentes,
           finishedAt: Date.now(),
         };
         setCurrentRun(done);
@@ -303,6 +323,10 @@ export function ConciliacionesPageClient({
 
   const handleSubmit = React.useCallback(() => {
     if (!banco || !principalFile) return;
+    if (previoFile && !isXlsxFilename(previoFile.name)) {
+      toast.error(PREVIO_INVALID_TYPE_MESSAGE);
+      return;
+    }
     void runConciliacion(banco, principalFile, previoFile);
   }, [banco, principalFile, previoFile, runConciliacion]);
 
@@ -399,7 +423,25 @@ export function ConciliacionesPageClient({
         disabled={isBusy}
       />
 
-      <div className="flex items-center justify-end gap-2" data-tour="procesar">
+      <div
+        className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2"
+        data-tour="procesar"
+      >
+        {currentRun?.status === "done" &&
+          (currentRun.registrosNuevos !== undefined ||
+            currentRun.registrosExistentes !== undefined) && (
+            <p className="mr-auto text-sm text-muted-foreground" role="status">
+              Registros nuevos:{" "}
+              <span className="font-medium tabular-nums text-foreground">
+                {currentRun.registrosNuevos ?? "—"}
+              </span>
+              {" · "}
+              Registros existentes:{" "}
+              <span className="font-medium tabular-nums text-foreground">
+                {currentRun.registrosExistentes ?? "—"}
+              </span>
+            </p>
+          )}
         <Button
           type="button"
           onClick={handleSubmit}

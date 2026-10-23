@@ -3,7 +3,13 @@ import { NextResponse } from "next/server";
 import { BUCKET } from "@/lib/conciliaciones/conciliar";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ACCEPTED_EXTENSIONS, ACCEPTED_MIME_PREFIXES, MAX_FILE_SIZE_BYTES } from "@/lib/uploads";
+import {
+  ACCEPTED_EXTENSIONS,
+  ACCEPTED_MIME_PREFIXES,
+  MAX_FILE_SIZE_BYTES,
+  PREVIO_INVALID_TYPE_MESSAGE,
+  isXlsxFilename,
+} from "@/lib/uploads";
 
 const URL_TTL_SECONDS = 60 * 5;
 const ALLOWED_KINDS = ["principal", "previo"] as const;
@@ -84,6 +90,9 @@ export async function POST(request: Request) {
       "invalid_type",
       415,
     );
+  }
+  if (kind === "previo" && !isXlsxFilename(filename)) {
+    return jsonError(PREVIO_INVALID_TYPE_MESSAGE, "invalid_type", 415);
   }
 
   const path = buildStoragePath(userId, kind as UploadKind, extension);

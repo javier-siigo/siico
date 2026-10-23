@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { ConciliacionError, cleanupStorage, conciliarColombia } from "@/lib/conciliaciones/conciliar";
 import { getBancoPorSlug } from "@/lib/conciliaciones/bancos";
 import { createClient } from "@/lib/supabase/server";
+import { PREVIO_INVALID_TYPE_MESSAGE, isXlsxFilename } from "@/lib/uploads";
 
 function jsonError(message: string, code: string, status: number) {
   return NextResponse.json({ error: message, code }, { status });
@@ -66,6 +67,13 @@ export async function POST(request: Request) {
     return jsonError("No tienes acceso al archivo previo.", "storage_unauthorized", 403);
   }
 
+  if (
+    previoPath &&
+    (typeof originalNamePrevio !== "string" || !isXlsxFilename(originalNamePrevio))
+  ) {
+    return jsonError(PREVIO_INVALID_TYPE_MESSAGE, "invalid_type", 415);
+  }
+
   const bancoRow = await getBancoPorSlug(pais, banco);
   if (!bancoRow) {
     return jsonError(
@@ -94,22 +102,25 @@ export async function POST(request: Request) {
         previoPath
           ? {
               storagePath: previoPath,
-              originalName:
-                typeof originalNamePrevio === "string" ? originalNamePrevio : "previo",
+              originalName: originalNamePrevio as string,
             }
           : undefined,
     });
 
     void cleanupStorage(pathsToCleanup);
     const arrayBuffer = await result.blob.arrayBuffer();
-    return new Response(arrayBuffer, {
-      status: 200,
-      headers: {
-        "Content-Type": result.contentType,
-        "Content-Disposition": `attachment; filename="${result.filename}"`,
-        "Cache-Control": "no-store",
-      },
+    const headers = new Headers({
+      "Content-Type": result.contentType,
+      "Content-Disposition": `attachment; filename="${result.filename}"`,
+      "Cache-Control": "no-store",
     });
+    if (result.registrosNuevos !== null) {
+      headers.set("X-Registros-Nuevos", String(result.registrosNuevos));
+    }
+    if (result.registrosExistentes !== null) {
+      headers.set("X-Registros-Existentes", String(result.registrosExistentes));
+    }
+    return new Response(arrayBuffer, { status: 200, headers });
   } catch (err) {
     if (err instanceof ConciliacionError) {
       void cleanupStorage(pathsToCleanup);

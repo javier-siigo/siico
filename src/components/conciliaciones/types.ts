@@ -29,5 +29,7 @@ export interface ConciliacionRun {
   resultSize?: number;
   resultBlob?: Blob;
   resultContentType?: string;
+  registrosNuevos?: number;
+  registrosExistentes?: number;
   error?: string;
 }

@@ -34,6 +34,8 @@ export interface ConciliacionResult {
   blob: Blob;
   filename: string;
   contentType: string;
+  registrosNuevos: number | null;
+  registrosExistentes: number | null;
 }
 
 export interface InputFile {
@@ -83,6 +85,12 @@ function extractFilename(contentDisposition: string | null): string {
   }
   const plain = /filename="?([^";]+)"?/i.exec(contentDisposition)?.[1];
   return plain?.trim() || FALLBACK_FILENAME;
+}
+
+function parseCount(value: string | null): number | null {
+  if (value === null || value.trim() === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 function buildStorageFilename(originalName: string): string {
@@ -203,6 +211,8 @@ export async function conciliarColombia(args: ConciliarArgs): Promise<Conciliaci
       contentType:
         response.headers.get("content-type")?.split(";")[0]?.trim() ||
         FALLBACK_CONTENT_TYPE,
+      registrosNuevos: parseCount(response.headers.get("x-registros-nuevos")),
+      registrosExistentes: parseCount(response.headers.get("x-registros-existentes")),
     };
   } catch (err) {
     if (err instanceof ConciliacionError) throw err;

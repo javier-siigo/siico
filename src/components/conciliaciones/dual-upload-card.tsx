@@ -2,6 +2,7 @@
 
 import { Banknote, FilePlus2 } from "lucide-react";
 
+import { PREVIO_ACCEPTED_EXTENSION } from "@/lib/uploads";
 import { cn } from "@/lib/utils";
 
 import { FileSlot } from "./file-slot";
@@ -46,8 +47,8 @@ export function DualUploadCard({
           </h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Sube el extracto bancario del período y, si cuentas con él, el
-          reporte previo. El reporte previo es opcional.
+          Sube el extracto bancario del período y, si cuentas con ella, la
+          conciliación anterior que entregan los contadores. Esta última es opcional.
         </p>
       </header>
 
@@ -70,7 +71,7 @@ export function DualUploadCard({
           />
         </SlotShell>
         <SlotShell
-          title="Reporte previo"
+          title="Conciliación anterior (Excel de contadores)"
           tour="previo"
           subtitle="Opcional"
           icon={<FilePlus2 className="size-4" aria-hidden />}
@@ -78,8 +79,9 @@ export function DualUploadCard({
           <FileSlot
             file={previoFile}
             status={previoStatus}
-            ariaLabel="Seleccionar reporte previo"
-            hint="o haz clic para seleccionarlo · .xlsx, .xls, .csv (máx. 10 MB)"
+            ariaLabel="Seleccionar conciliación anterior"
+            hint="o haz clic para seleccionarla · solo .xlsx (máx. 10 MB)"
+            accept={PREVIO_ACCEPTED_EXTENSION}
             onSelect={onSelectPrevio}
             onRemove={onRemovePrevio}
             disabled={disabled}

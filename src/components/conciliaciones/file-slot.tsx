@@ -14,6 +14,8 @@ interface FileSlotProps {
   status: FileSlotState;
   ariaLabel: string;
   hint?: string;
+  /** Extensiones aceptadas por el selector; por defecto .xlsx, .xls y .csv. */
+  accept?: string;
   onSelect: (file: File) => void;
   onRemove: () => void;
   disabled?: boolean;
@@ -24,6 +26,7 @@ export function FileSlot({
   status,
   ariaLabel,
   hint,
+  accept = ACCEPTED_EXTENSIONS_WITH_DOTS.join(","),
   onSelect,
   onRemove,
   disabled,
@@ -82,7 +85,7 @@ export function FileSlot({
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPTED_EXTENSIONS_WITH_DOTS.join(",")}
+        accept={accept}
         className="sr-only"
         onChange={onChange}
         disabled={busy}

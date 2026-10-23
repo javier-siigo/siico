@@ -21,7 +21,7 @@ Rol `conciliaciones` **con el país asignado**, o `admin`. La página llama a `r
 ## Flujo del usuario
 
 1. Elige el **banco** (combobox; lista desde BD, solo bancos activos del país). Cambiar de banco limpia el resultado.
-2. Sube el **Extracto bancario** (obligatorio) y, si lo tiene, el **Reporte previo** (opcional). Formatos `.xlsx`, `.xls`, `.csv`, máx. 10 MB c/u.
+2. Sube el **Extracto bancario** (obligatorio) y, si la tiene, la **Conciliación anterior (Excel de contadores)** (opcional). El extracto acepta `.xlsx`, `.xls`, `.csv`; la conciliación anterior solo `.xlsx` (se valida al elegirla y antes de enviar). Máx. 10 MB c/u.
 3. Pulsa **Procesar conciliación**. Se ve el estado "Procesando…".
 4. Al terminar, aparece **Descargar** con el Excel resultante. Se puede cancelar quitando el archivo o el banco (aborta las peticiones en curso).
 
@@ -55,7 +55,7 @@ sequenceDiagram
 Archivo: `src/app/api/conciliaciones/upload-url/route.ts`
 
 - Requiere sesión (`getClaims`). Valida el cuerpo: `pais`, `kind` (`principal` | `previo`), `filename`, `contentType`, `size`.
-- Rechaza tamaño > 10 MB (413) y tipo no soportado (415).
+- Rechaza tamaño > 10 MB (413) y tipo no soportado (415). Para `kind = previo` solo admite `.xlsx`.
 - Genera la ruta `{userId_saneado}/{kind}/{uuid}.{ext}` en el bucket **`conciliaciones-uploads`** y pide una URL firmada con el cliente admin. Devuelve `{url, path, token, bucket, expiresIn: 300}`.
 
 ### Paso 2 — Subida directa
@@ -67,12 +67,12 @@ El navegador hace `PUT` del archivo a la URL firmada (no pasa por Next).
 Archivos: `src/app/api/conciliaciones/conciliar/route.ts`, `src/lib/conciliaciones/conciliar.ts`, `src/lib/conciliaciones/bancos.ts`
 
 1. Valida sesión y cuerpo. `maxDuration = 90` s.
-2. Comprueba que `storagePathPrincipal` (y `storagePathPrevio`) empiecen por `{userId}/principal/` o `{userId}/previo/` y no contengan más `/`. Si no: 403 `storage_unauthorized`.
+2. Comprueba que `storagePathPrincipal` (y `storagePathPrevio`) empiecen por `{userId}/principal/` o `{userId}/previo/` y no contengan más `/`. Si no: 403 `storage_unauthorized`. Si hay previo y su nombre original no es `.xlsx`: 415 `invalid_type`.
 3. Busca el banco (`getBancoPorSlug`) en `conciliacion_bancos` por `pais` + `slug`. Si no existe o `activo = false`: 400 `upstream_config`.
 4. `conciliarColombia(...)` (nombre histórico; sirve a todos los países):
    - Descarga cada archivo del bucket con el cliente admin y los **revalida** (no vacío, ≤ 10 MB, tipo).
    - Arma `FormData` y hace `POST` al `webhook_url` del banco con header `x-webhook-secret` y timeout de **60 s**.
-5. Devuelve el binario con `Content-Disposition: attachment` (nombre tomado de la cabecera de n8n; si no viene: `resultado_conciliacion.xlsx`) y `Cache-Control: no-store`.
+5. Devuelve el binario con `Content-Disposition: attachment` (nombre tomado de la cabecera de n8n; si no viene: `resultado_conciliacion.xlsx`) y `Cache-Control: no-store`. Reenvía `X-Registros-Nuevos` y `X-Registros-Existentes` si n8n los envía; la UI los muestra junto al botón de descarga.
 6. Limpia los archivos del bucket (también cuando hay error de conciliación).
 
 ## Contrato con n8n
@@ -85,9 +85,9 @@ Archivos: `src/app/api/conciliaciones/conciliar/route.ts`, `src/lib/conciliacion
 | `banco` | texto | slug del banco (`conciliacion_bancos.slug`) |
 | `bancoNombre` | texto | nombre visible |
 | `file` | archivo | extracto bancario (obligatorio) |
-| `previous` | archivo | reporte previo (opcional; solo si se subió) |
+| `previous` | archivo | conciliación anterior de los contadores, `.xlsx` (opcional; solo si se subió) |
 
-**Response esperada:** archivo binario (por defecto Excel `.xlsx`). Cualquier estado no 2xx, respuesta vacía, timeout o fallo de red se traduce a error.
+**Response esperada:** archivo binario (por defecto Excel `.xlsx`), con headers opcionales `X-Registros-Nuevos` y `X-Registros-Existentes` (enteros). Cualquier estado no 2xx, respuesta vacía, timeout o fallo de red se traduce a error.
 
 > Cada banco puede apuntar a un workflow distinto. **La lógica de conciliación vive en esos workflows**, no en este repo.
 
